@@ -1,11 +1,51 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, Bot, Shield, Zap } from "lucide-react";
 
 const Index = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+      <div className="container px-4 py-16">
+        <div className="text-center space-y-8 max-w-3xl mx-auto">
+          <div className="space-y-4">
+            <h1 className="text-6xl font-bold text-primary">Growth</h1>
+            <p className="text-xl text-muted-foreground">
+              AI-Powered Cryptocurrency Trading Platform
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 py-8">
+            <div className="p-4 rounded-lg border border-border bg-card">
+              <Bot className="h-8 w-8 text-primary mx-auto mb-2" />
+              <h3 className="font-semibold mb-1">Multi-Agent AI</h3>
+              <p className="text-sm text-muted-foreground">Automated trading strategies</p>
+            </div>
+            <div className="p-4 rounded-lg border border-border bg-card">
+              <TrendingUp className="h-8 w-8 text-primary mx-auto mb-2" />
+              <h3 className="font-semibold mb-1">Smart Trading</h3>
+              <p className="text-sm text-muted-foreground">Best prices across DEXs</p>
+            </div>
+            <div className="p-4 rounded-lg border border-border bg-card">
+              <Shield className="h-8 w-8 text-primary mx-auto mb-2" />
+              <h3 className="font-semibold mb-1">Secure Wallet</h3>
+              <p className="text-sm text-muted-foreground">Self-custody with encryption</p>
+            </div>
+            <div className="p-4 rounded-lg border border-border bg-card">
+              <Zap className="h-8 w-8 text-primary mx-auto mb-2" />
+              <h3 className="font-semibold mb-1">Real-time Analytics</h3>
+              <p className="text-sm text-muted-foreground">Advanced insights</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg" className="text-lg px-8">
+              <Link to="/register">Get Started</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="text-lg px-8">
+              <Link to="/login">Sign In</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
