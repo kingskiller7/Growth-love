@@ -15,6 +15,10 @@ import Trade from "./pages/Trade";
 import Portfolio from "./pages/Portfolio";
 import Agents from "./pages/Agents";
 import Menu from "./pages/Menu";
+import Wallet from "./pages/Wallet";
+import Deposit from "./pages/Deposit";
+import Withdraw from "./pages/Withdraw";
+import Analytics from "./pages/Analytics";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +39,10 @@ const App = () => (
           <Route path="/trade" element={<Trade />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/agents" element={<Agents />} />
+          <Route path="/wallet" element={<Wallet />} />
+          <Route path="/deposit" element={<Deposit />} />
+          <Route path="/withdraw" element={<Withdraw />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/menu" element={<Menu />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
