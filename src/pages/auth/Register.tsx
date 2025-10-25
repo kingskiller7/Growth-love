@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,13 +12,23 @@ import { Progress } from "@/components/ui/progress";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { signUp, user } = useAuth();
+  const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const passwordStrength = () => {
     let strength = 0;
@@ -27,18 +39,49 @@ export default function Register() {
     return strength;
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (password !== confirmPassword) {
-      // TODO: Show error toast
+      toast({
+        title: "Passwords don't match",
+        description: "Please ensure both passwords are identical",
+        variant: "destructive",
+      });
       return;
     }
+    
     if (!acceptTerms || !acceptPrivacy) {
-      // TODO: Show error toast
+      toast({
+        title: "Accept terms",
+        description: "Please accept the terms of service and privacy policy",
+        variant: "destructive",
+      });
       return;
     }
-    // TODO: Implement registration logic
-    navigate("/verify-email");
+
+    if (!fullName.trim()) {
+      toast({
+        title: "Name required",
+        description: "Please enter your full name",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setLoading(true);
+    
+    const { error } = await signUp(email, password, fullName);
+    
+    if (!error) {
+      toast({
+        title: "Account created!",
+        description: "Please check your email to verify your account.",
+      });
+      navigate("/verify-email");
+    }
+    
+    setLoading(false);
   };
 
   return (
@@ -56,6 +99,17 @@ export default function Register() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                type="text"
+                placeholder="Enter your full name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -149,8 +203,8 @@ export default function Register() {
                 </Label>
               </div>
             </div>
-            <Button type="submit" className="w-full" size="lg">
-              Create account
+            <Button type="submit" className="w-full" size="lg" disabled={!acceptTerms || !acceptPrivacy || loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create account"}
             </Button>
           </form>
         </CardContent>

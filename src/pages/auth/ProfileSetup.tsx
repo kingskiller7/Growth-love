@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload, User } from "lucide-react";
+import { Upload, User, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,10 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function ProfileSetup() {
   const navigate = useNavigate();
+  const { updateProfile } = useAuth();
+  const { toast } = useToast();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -26,9 +32,25 @@ export default function ProfileSetup() {
     }
   };
 
-  const handleContinue = () => {
-    // TODO: Implement profile setup logic
-    navigate("/security-setup");
+  const handleContinue = async () => {
+    setLoading(true);
+    
+    const { error } = await updateProfile({
+      full_name: fullName,
+      phone_number: phone,
+      country,
+      date_of_birth: dateOfBirth || null,
+    });
+
+    if (!error) {
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been saved successfully",
+      });
+      navigate("/security-setup");
+    }
+    
+    setLoading(false);
   };
 
   const handleSkip = () => {
@@ -91,6 +113,16 @@ export default function ProfileSetup() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="dob">Date of Birth</Label>
+              <Input
+                id="dob"
+                type="date"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="country">Country</Label>
               <Select value={country} onValueChange={setCountry}>
                 <SelectTrigger id="country">
@@ -108,8 +140,8 @@ export default function ProfileSetup() {
           </div>
 
           <div className="space-y-3">
-            <Button onClick={handleContinue} className="w-full" size="lg">
-              Continue
+            <Button onClick={handleContinue} className="w-full" size="lg" disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}
             </Button>
             <Button
               onClick={handleSkip}

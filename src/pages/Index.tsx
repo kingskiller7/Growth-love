@@ -1,8 +1,19 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Bot, Shield, Zap } from "lucide-react";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/dashboard");
+    }
+  }, [user, loading, navigate]);
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="container px-4 py-16">
