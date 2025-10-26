@@ -21,6 +21,10 @@ import Wallet from "./pages/Wallet";
 import Deposit from "./pages/Deposit";
 import Withdraw from "./pages/Withdraw";
 import Analytics from "./pages/Analytics";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import PoolManagement from "./pages/admin/PoolManagement";
+import UserManagement from "./pages/admin/UserManagement";
+import GovernanceManagement from "./pages/admin/GovernanceManagement";
 
 const queryClient = new QueryClient();
 
@@ -47,7 +51,10 @@ const App = () => (
             <Route path="/withdraw" element={<ProtectedRoute><Withdraw /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
             <Route path="/menu" element={<ProtectedRoute><Menu /></ProtectedRoute>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/pools" element={<ProtectedRoute><PoolManagement /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+            <Route path="/admin/governance" element={<ProtectedRoute><GovernanceManagement /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
