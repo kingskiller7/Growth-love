@@ -2,26 +2,40 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowDownRight, ArrowUpRight, Copy, QrCode, Clock } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Copy, Clock, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const mockBalances = [
-  { symbol: "DEW", name: "DEW Token", balance: 45050, value: 45050, icon: "💎" },
-  { symbol: "BTC", name: "Bitcoin", balance: 0.5432, value: 23490, icon: "₿" },
-  { symbol: "ETH", name: "Ethereum", balance: 8.2341, value: 13814, icon: "Ξ" },
-  { symbol: "USDT", name: "Tether", balance: 6517.23, value: 6517, icon: "₮" },
-];
-
-const mockTransactions = [
-  { type: "Deposit", asset: "USDT", amount: "5,000", status: "completed", time: "2 hours ago", hash: "0x1234...5678" },
-  { type: "Withdrawal", asset: "BTC", amount: "0.2", status: "completed", time: "1 day ago", hash: "0x8765...4321" },
-  { type: "Deposit", asset: "ETH", amount: "5.0", status: "pending", time: "2 days ago", hash: "0xabcd...efgh" },
-  { type: "Withdrawal", asset: "USDT", amount: "2,500", status: "completed", time: "3 days ago", hash: "0xijkl...mnop" },
-];
+import { usePortfolio } from "@/hooks/usePortfolio";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useToast } from "@/hooks/use-toast";
+import { formatDistanceToNow } from "date-fns";
 
 export default function Wallet() {
   const navigate = useNavigate();
-  const totalValue = mockBalances.reduce((sum, balance) => sum + balance.value, 0);
+  const { portfolio, holdings, loading: portfolioLoading } = usePortfolio();
+  const { transactions, loading: transactionsLoading } = useTransactions();
+  const { toast } = useToast();
+
+  const totalValue = portfolio?.total_value_usd || 0;
+
+  const handleCopyHash = (hash: string | null) => {
+    if (hash) {
+      navigator.clipboard.writeText(hash);
+      toast({
+        title: "Copied",
+        description: "Transaction hash copied to clipboard",
+      });
+    }
+  };
+
+  if (portfolioLoading) {
+    return (
+      <MainLayout>
+        <div className="container px-4 py-6 flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -60,25 +74,34 @@ export default function Wallet() {
             <CardTitle>Assets</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {mockBalances.map((asset, index) => (
-              <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-2xl">
-                    {asset.icon}
-                  </div>
-                  <div>
-                    <div className="font-semibold">{asset.name}</div>
-                    <div className="text-sm text-muted-foreground">{asset.symbol}</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-mono font-semibold">{asset.balance.toLocaleString()}</div>
-                  <div className="text-sm text-muted-foreground font-mono">
-                    ${asset.value.toLocaleString()}
-                  </div>
-                </div>
+            {holdings.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No assets yet</p>
+                <p className="text-sm mt-2">Make a deposit to get started</p>
               </div>
-            ))}
+            ) : (
+              holdings.map((asset) => (
+                <div key={asset.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <span className="font-bold text-lg">{asset.asset_symbol.slice(0, 2)}</span>
+                    </div>
+                    <div>
+                      <div className="font-semibold">{asset.asset_name}</div>
+                      <div className="text-sm text-muted-foreground">{asset.asset_symbol}</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono font-semibold">
+                      {asset.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+                    </div>
+                    <div className="text-sm text-muted-foreground font-mono">
+                      ${(asset.value_usd || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -90,47 +113,61 @@ export default function Wallet() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {mockTransactions.map((tx, index) => (
-                <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      tx.type === "Deposit" ? "bg-primary/20" : "bg-destructive/20"
-                    }`}>
-                      {tx.type === "Deposit" ? (
-                        <ArrowDownRight className="h-5 w-5 text-primary" />
-                      ) : (
-                        <ArrowUpRight className="h-5 w-5 text-destructive" />
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-semibold">{tx.type} {tx.asset}</div>
-                      <div className="text-sm text-muted-foreground flex items-center gap-2">
-                        {tx.time}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-4 w-4 p-0"
-                          onClick={() => navigator.clipboard.writeText(tx.hash)}
-                        >
-                          <Copy className="h-3 w-3" />
-                        </Button>
+            {transactionsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No transactions yet</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {transactions.slice(0, 10).map((tx) => (
+                  <div key={tx.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        tx.transaction_type === "deposit" ? "bg-primary/20" : "bg-destructive/20"
+                      }`}>
+                        {tx.transaction_type === "deposit" ? (
+                          <ArrowDownRight className="h-5 w-5 text-primary" />
+                        ) : (
+                          <ArrowUpRight className="h-5 w-5 text-destructive" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-semibold capitalize">{tx.transaction_type} {tx.asset_symbol}</div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-2">
+                          {formatDistanceToNow(new Date(tx.created_at), { addSuffix: true })}
+                          {tx.transaction_hash && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-4 w-4 p-0"
+                              onClick={() => handleCopyHash(tx.transaction_hash)}
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
+                    <div className="text-right">
+                      <div className="font-mono">
+                        {tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+                      </div>
+                      <Badge
+                        variant={tx.status === "completed" ? "secondary" : "outline"}
+                        className={tx.status === "completed" ? "bg-primary/10 text-primary" : ""}
+                      >
+                        {tx.status === "pending" && <Clock className="h-3 w-3 mr-1" />}
+                        {tx.status}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono">{tx.amount}</div>
-                    <Badge
-                      variant={tx.status === "completed" ? "secondary" : "outline"}
-                      className={tx.status === "completed" ? "bg-primary/10 text-primary" : ""}
-                    >
-                      {tx.status === "pending" && <Clock className="h-3 w-3 mr-1" />}
-                      {tx.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

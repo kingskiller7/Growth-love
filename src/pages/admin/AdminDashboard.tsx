@@ -18,33 +18,8 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAdminAccess();
     fetchStats();
   }, []);
-
-  const checkAdminAccess = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    const { data: roles } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .single();
-
-    if (!roles) {
-      toast({
-        title: 'Access Denied',
-        description: 'You do not have admin privileges',
-        variant: 'destructive',
-      });
-      navigate('/dashboard');
-    }
-  };
 
   const fetchStats = async () => {
     try {

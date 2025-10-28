@@ -2,19 +2,29 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PieChart, TrendingUp, ArrowUpRight, Search, Filter } from "lucide-react";
-import { Input } from "@/components/ui/input";
-
-const mockHoldings = [
-  { asset: "BTC", name: "Bitcoin", amount: 0.5432, value: 23490.37, change: 3.2, allocation: 35 },
-  { asset: "ETH", name: "Ethereum", amount: 8.2341, value: 13814.20, change: -1.5, allocation: 21 },
-  { asset: "SOL", name: "Solana", amount: 150.5, value: 9782.50, change: 5.8, allocation: 15 },
-  { asset: "BNB", name: "Binance Coin", amount: 42.1, value: 12945.70, change: 2.1, allocation: 19 },
-  { asset: "USDT", name: "Tether", amount: 6517.23, value: 6517.23, change: 0, allocation: 10 },
-];
+import { PieChart, TrendingUp, ArrowUpRight, Search, Filter, Loader2 } from "lucide-react";
+import { usePortfolio } from "@/hooks/usePortfolio";
 
 export default function Portfolio() {
-  const totalValue = mockHoldings.reduce((sum, holding) => sum + holding.value, 0);
+  const { portfolio, holdings, loading } = usePortfolio();
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="container px-4 py-6 flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </MainLayout>
+    );
+  }
+
+  const totalValue = portfolio?.total_value_usd || 0;
+  const change24h = portfolio?.change_24h_percent || 0;
+  const bestPerformer = holdings.reduce((best, holding) => 
+    (holding.change_24h_percent || 0) > (best.change_24h_percent || 0) ? holding : best
+  , holdings[0] || { asset_symbol: 'N/A', change_24h_percent: 0 });
+
+  const totalAllocation = holdings.reduce((sum, h) => sum + (h.value_usd || 0), 0);
 
   return (
     <MainLayout>
@@ -37,8 +47,8 @@ export default function Portfolio() {
               <PieChart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold font-mono">${totalValue.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground mt-1">Across {mockHoldings.length} assets</p>
+              <div className="text-3xl font-bold font-mono">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              <p className="text-xs text-muted-foreground mt-1">Across {holdings.length} assets</p>
             </CardContent>
           </Card>
 
@@ -48,8 +58,12 @@ export default function Portfolio() {
               <TrendingUp className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold font-mono text-primary">+2.87%</div>
-              <p className="text-xs text-muted-foreground mt-1">+$1,845.32</p>
+              <div className={`text-3xl font-bold font-mono ${change24h >= 0 ? 'text-primary' : 'text-destructive'}`}>
+                {change24h >= 0 ? '+' : ''}{change24h.toFixed(2)}%
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {change24h >= 0 ? '+' : ''}${(portfolio?.change_24h || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
             </CardContent>
           </Card>
 
@@ -59,8 +73,10 @@ export default function Portfolio() {
               <TrendingUp className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">SOL</div>
-              <p className="text-xs text-primary mt-1">+5.8% today</p>
+              <div className="text-2xl font-bold">{bestPerformer?.asset_symbol || 'N/A'}</div>
+              <p className={`text-xs mt-1 ${(bestPerformer?.change_24h_percent || 0) >= 0 ? 'text-primary' : 'text-destructive'}`}>
+                {(bestPerformer?.change_24h_percent || 0) >= 0 ? '+' : ''}{(bestPerformer?.change_24h_percent || 0).toFixed(2)}% today
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -81,29 +97,38 @@ export default function Portfolio() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {mockHoldings.map((holding, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                        <span className="font-bold text-sm">{holding.asset.slice(0, 2)}</span>
+              {holdings.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No holdings yet</p>
+                  <p className="text-sm mt-2">Start trading to build your portfolio</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {holdings.map((holding) => (
+                    <div key={holding.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                          <span className="font-bold text-sm">{holding.asset_symbol.slice(0, 2)}</span>
+                        </div>
+                        <div>
+                          <div className="font-semibold">{holding.asset_name}</div>
+                          <div className="text-sm text-muted-foreground font-mono">
+                            {holding.amount.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 8 })} {holding.asset_symbol}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-semibold">{holding.name}</div>
-                        <div className="text-sm text-muted-foreground font-mono">
-                          {holding.amount} {holding.asset}
+                      <div className="text-right">
+                        <div className="font-mono font-semibold">
+                          ${(holding.value_usd || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                        <div className={`text-sm font-mono ${(holding.change_24h_percent || 0) > 0 ? "text-primary" : (holding.change_24h_percent || 0) < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                          {(holding.change_24h_percent || 0) > 0 ? "+" : ""}{(holding.change_24h_percent || 0).toFixed(2)}%
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-mono font-semibold">${holding.value.toLocaleString()}</div>
-                      <div className={`text-sm font-mono ${holding.change > 0 ? "text-primary" : holding.change < 0 ? "text-destructive" : "text-muted-foreground"}`}>
-                        {holding.change > 0 ? "+" : ""}{holding.change}%
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -120,20 +145,23 @@ export default function Portfolio() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  {mockHoldings.map((holding, index) => (
-                    <div key={index} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium">{holding.asset}</span>
-                        <span className="font-mono">{holding.allocation}%</span>
+                  {holdings.map((holding) => {
+                    const allocation = totalAllocation > 0 ? ((holding.value_usd || 0) / totalAllocation * 100) : 0;
+                    return (
+                      <div key={holding.id} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium">{holding.asset_symbol}</span>
+                          <span className="font-mono">{allocation.toFixed(1)}%</span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary"
+                            style={{ width: `${allocation}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary"
-                          style={{ width: `${holding.allocation}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </CardContent>
