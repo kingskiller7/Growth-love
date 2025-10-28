@@ -17,6 +17,7 @@ export function AdminRoute({ children }: AdminRouteProps) {
 
   useEffect(() => {
     checkAdminAccess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const checkAdminAccess = async () => {
@@ -61,11 +62,6 @@ export function AdminRoute({ children }: AdminRouteProps) {
   }
 
   if (isAdmin === false) {
-    toast({
-      title: 'Access Denied',
-      description: 'You do not have admin privileges',
-      variant: 'destructive',
-    });
     return <Navigate to="/dashboard" replace />;
   }
 
