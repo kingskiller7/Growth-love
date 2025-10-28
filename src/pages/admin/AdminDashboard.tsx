@@ -109,6 +109,15 @@ export default function AdminDashboard() {
             >
               Governance
             </button>
+            <button
+              onClick={() => navigate('/admin/make-admin')}
+              className="w-full px-4 py-2 text-left hover:bg-secondary rounded-md transition-colors border-t mt-2 pt-4"
+            >
+              <span className="flex items-center gap-2">
+                <span className="text-primary">🔐</span>
+                Grant Admin Access
+              </span>
+            </button>
           </CardContent>
         </Card>
 

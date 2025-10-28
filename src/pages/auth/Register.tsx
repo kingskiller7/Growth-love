@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { registerSchema } from "@/lib/validations";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -42,15 +43,6 @@ export default function Register() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please ensure both passwords are identical",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     if (!acceptTerms || !acceptPrivacy) {
       toast({
         title: "Accept terms",
@@ -60,10 +52,19 @@ export default function Register() {
       return;
     }
 
-    if (!fullName.trim()) {
+    // Validate inputs with zod
+    const validation = registerSchema.safeParse({
+      fullName,
+      email,
+      password,
+      confirmPassword,
+    });
+
+    if (!validation.success) {
+      const error = validation.error.errors[0];
       toast({
-        title: "Name required",
-        description: "Please enter your full name",
+        title: "Validation error",
+        description: error.message,
         variant: "destructive",
       });
       return;

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { profileUpdateSchema } from "@/lib/validations";
 
 export default function ProfileSetup() {
   const navigate = useNavigate();
@@ -33,14 +34,29 @@ export default function ProfileSetup() {
   };
 
   const handleContinue = async () => {
-    setLoading(true);
-    
-    const { error } = await updateProfile({
+    const profileData = {
       full_name: fullName,
       phone_number: phone,
       country,
-      date_of_birth: dateOfBirth || null,
-    });
+      date_of_birth: dateOfBirth || undefined,
+    };
+
+    // Validate with zod
+    const validation = profileUpdateSchema.safeParse(profileData);
+    
+    if (!validation.success) {
+      const error = validation.error.errors[0];
+      toast({
+        title: "Validation error",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    const { error } = await updateProfile(validation.data);
 
     if (!error) {
       toast({
