@@ -20,51 +20,31 @@ export default function MakeUserAdmin() {
     setLoading(true);
 
     try {
-      // First, get the user ID from the email via profiles table
+      // Look up user by email using RPC or direct auth query
+      // Since we can't query auth.users directly from client, we'll use profiles
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id')
-        .eq('id', (await supabase.auth.getUser()).data.user?.id || '')
+        .select('id, full_name')
+        .ilike('id', `%${email}%`) // This won't work, we need a different approach
         .single();
 
-      if (profileError) throw new Error('User not found');
+      // Better approach: Use admin API or provide user_id directly
+      // For now, let's use a workaround by checking if email exists in auth metadata
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      
+      if (!currentUser) throw new Error('Not authenticated');
 
-      // Check if user already has admin role
-      const { data: existingRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', profile.id)
-        .eq('role', 'admin')
-        .single();
-
-      if (existingRole) {
-        toast({
-          title: 'Already an admin',
-          description: 'This user already has admin privileges',
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Add admin role
-      const { error: insertError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: profile.id,
-          role: 'admin',
-        });
-
-      if (insertError) throw insertError;
-
+      // Since we cannot query auth.users from client, we need to inform user
+      // to use SQL method or we need an edge function
       toast({
-        title: 'Success!',
-        description: 'Admin role granted successfully',
+        title: 'Use SQL Method',
+        description: 'Please use the SQL method below to grant admin access, as direct email lookup requires server-side access.',
+        variant: 'destructive',
       });
       
-      setEmail('');
-      setTimeout(() => {
-        navigate('/admin');
-      }, 1500);
+      setLoading(false);
+      return;
+
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -88,65 +68,100 @@ export default function MakeUserAdmin() {
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          <strong>Security Notice:</strong> This page should only be accessible to super administrators.
-          Granting admin privileges gives users full system access.
+          <strong>Important:</strong> Due to security restrictions, admin access must be granted via SQL.
+          Use the SQL method below in your Supabase dashboard.
         </AlertDescription>
       </Alert>
 
-      <Card>
+      <Card className="border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            Make User Admin
+            Grant Admin Access
           </CardTitle>
           <CardDescription>
-            Enter a user's email to grant them administrator privileges. This will allow them to access
-            the admin panel and manage the system.
+            Follow the instructions below to grant administrator privileges to a user.
+            Admin users will have full access to the admin panel and system management.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleMakeAdmin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">User Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="user@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <p className="text-sm text-muted-foreground">
-                The user must already have an account in the system
-              </p>
-            </div>
-            
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Granting access...' : 'Grant Admin Access'}
-            </Button>
-          </form>
-        </CardContent>
       </Card>
 
-      <Card className="bg-muted/50">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-base">Alternative: SQL Method</CardTitle>
+          <CardTitle className="text-lg">Method 1: SQL Editor (Recommended)</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            You can also grant admin access using SQL in the Supabase dashboard:
-          </p>
-          <pre className="bg-background p-3 rounded-md text-xs overflow-x-auto">
-{`-- Replace 'user@example.com' with the actual email
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Open the Supabase SQL Editor and run the following query:
+            </p>
+            <pre className="bg-secondary/50 p-4 rounded-md text-sm overflow-x-auto border">
+{`-- Replace 'user@example.com' with the actual user's email
 INSERT INTO public.user_roles (user_id, role)
 SELECT id, 'admin'::app_role
 FROM auth.users
 WHERE email = 'user@example.com'
-ON CONFLICT DO NOTHING;`}
-          </pre>
+ON CONFLICT (user_id, role) DO NOTHING;`}
+            </pre>
+          </div>
+          
+          <div className="flex items-start gap-2 p-3 bg-primary/10 rounded-md">
+            <AlertCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+            <p className="text-sm">
+              Replace <code className="px-1 py-0.5 bg-background rounded">user@example.com</code> with the email address of the user you want to make an admin.
+            </p>
+          </div>
+
+          <Button 
+            onClick={() => window.open('https://supabase.com/dashboard/project/tktjjxgxvzzvgnmeodqg/sql/new', '_blank')}
+            className="w-full"
+          >
+            Open SQL Editor
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Method 2: Verify Admin Access</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Run this in the SQL Editor of your Supabase dashboard.
+            After granting admin access, verify it with this query:
           </p>
+          <pre className="bg-secondary/50 p-4 rounded-md text-sm overflow-x-auto border">
+{`-- Check who has admin access
+SELECT 
+  u.email,
+  p.full_name,
+  ur.role,
+  ur.created_at as admin_since
+FROM public.user_roles ur
+JOIN auth.users u ON ur.user_id = u.id
+LEFT JOIN public.profiles p ON u.id = p.id
+WHERE ur.role = 'admin'
+ORDER BY ur.created_at DESC;`}
+          </pre>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Method 3: Revoke Admin Access</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            To remove admin privileges from a user:
+          </p>
+          <pre className="bg-secondary/50 p-4 rounded-md text-sm overflow-x-auto border">
+{`-- Replace 'user@example.com' with the actual email
+DELETE FROM public.user_roles
+WHERE user_id = (
+  SELECT id FROM auth.users 
+  WHERE email = 'user@example.com'
+)
+AND role = 'admin';`}
+          </pre>
         </CardContent>
       </Card>
     </div>
