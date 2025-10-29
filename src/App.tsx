@@ -22,6 +22,7 @@ import Wallet from "./pages/Wallet";
 import Deposit from "./pages/Deposit";
 import Withdraw from "./pages/Withdraw";
 import Analytics from "./pages/Analytics";
+import SecuritySettings from "./pages/SecuritySettings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PoolManagement from "./pages/admin/PoolManagement";
 import UserManagement from "./pages/admin/UserManagement";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/deposit" element={<ProtectedRoute><Deposit /></ProtectedRoute>} />
             <Route path="/withdraw" element={<ProtectedRoute><Withdraw /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
             <Route path="/menu" element={<ProtectedRoute><Menu /></ProtectedRoute>} />
                 <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                 <Route path="/admin/pools" element={<AdminRoute><PoolManagement /></AdminRoute>} />
