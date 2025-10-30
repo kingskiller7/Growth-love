@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,31 +7,57 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Activity } from "lucide-react";
-
-const mockOrderBook = {
-  asks: [
-    { price: 43250.50, amount: 0.5432, total: 23490.37 },
-    { price: 43251.00, amount: 1.2341, total: 53385.24 },
-    { price: 43251.50, amount: 0.8765, total: 37908.19 },
-  ],
-  bids: [
-    { price: 43249.50, amount: 0.6543, total: 28296.82 },
-    { price: 43249.00, amount: 1.4567, total: 62985.28 },
-    { price: 43248.50, amount: 0.9876, total: 42710.66 },
-  ],
-};
-
-const mockOpenOrders = [
-  { type: "Limit Buy", pair: "BTC/USDT", amount: 0.5, price: 42500, filled: 0, status: "open" },
-  { type: "Limit Sell", pair: "ETH/USDT", amount: 2.0, price: 1720, filled: 0, status: "open" },
-];
+import { TrendingUp, Activity, Loader2, X } from "lucide-react";
+import { useMarketData } from "@/hooks/useMarketData";
+import { useOrders } from "@/hooks/useOrders";
+import { useDexPrices } from "@/hooks/useDexPrices";
+import { formatDistanceToNow } from "date-fns";
 
 export default function Trade() {
-  const [selectedPair, setSelectedPair] = useState("BTC/USDT");
+  const [selectedPair, setSelectedPair] = useState("BTC");
   const [orderType, setOrderType] = useState("market");
   const [amount, setAmount] = useState("");
   const [price, setPrice] = useState("");
+  const [stopPrice, setStopPrice] = useState("");
+  
+  const { prices: marketPrices, getPriceBySymbol } = useMarketData();
+  const { openOrders, createOrder, cancelOrder, executeOrder } = useOrders();
+  const { prices: dexPrices, fetchDexPrices, loading: dexLoading } = useDexPrices();
+
+  const currentPrice = getPriceBySymbol(selectedPair);
+
+  useEffect(() => {
+    if (amount && parseFloat(amount) > 0) {
+      fetchDexPrices(selectedPair, 'USDT', parseFloat(amount));
+    }
+  }, [selectedPair, amount]);
+
+  const handlePlaceOrder = async (side: 'buy' | 'sell') => {
+    if (!amount || parseFloat(amount) <= 0) {
+      return;
+    }
+
+    try {
+      await createOrder({
+        baseAsset: selectedPair,
+        quoteAsset: 'USDT',
+        orderType: orderType as 'market' | 'limit' | 'stop',
+        orderSide: side,
+        amount: parseFloat(amount),
+        price: price ? parseFloat(price) : undefined,
+        stopPrice: stopPrice ? parseFloat(stopPrice) : undefined,
+      });
+      
+      setAmount("");
+      setPrice("");
+      setStopPrice("");
+    } catch (error) {
+      console.error('Error placing order:', error);
+    }
+  };
+
+  const change24h = currentPrice?.change_24h_percent || 0;
+  const isPositive = change24h >= 0;
 
   return (
     <MainLayout>
@@ -39,17 +65,18 @@ export default function Trade() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">Trade</h1>
-            <p className="text-muted-foreground">Execute trades across multiple DEXs</p>
+            <p className="text-muted-foreground">Execute trades with best price discovery</p>
           </div>
           <Select value={selectedPair} onValueChange={setSelectedPair}>
             <SelectTrigger className="w-[180px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="BTC/USDT">BTC/USDT</SelectItem>
-              <SelectItem value="ETH/USDT">ETH/USDT</SelectItem>
-              <SelectItem value="SOL/USDT">SOL/USDT</SelectItem>
-              <SelectItem value="BNB/USDT">BNB/USDT</SelectItem>
+              {marketPrices.map((price) => (
+                <SelectItem key={price.symbol} value={price.symbol}>
+                  {price.symbol}/USDT
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -58,36 +85,59 @@ export default function Trade() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">BTC/USDT</CardTitle>
-                <Badge variant="secondary" className="bg-primary/10 text-primary">
+                <CardTitle className="text-lg">{selectedPair}/USDT</CardTitle>
+                <Badge variant={isPositive ? "default" : "destructive"}>
                   <TrendingUp className="h-3 w-3 mr-1" />
-                  +2.45%
+                  {isPositive ? '+' : ''}{change24h.toFixed(2)}%
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold font-mono">$43,250.00</div>
-              <div className="text-sm text-muted-foreground mt-1">24h Vol: $2.4B</div>
+              <div className="text-3xl font-bold font-mono">
+                ${currentPrice?.price.toFixed(2) || '0.00'}
+              </div>
+              <div className="text-sm text-muted-foreground mt-1">
+                Last updated: {currentPrice ? formatDistanceToNow(new Date(currentPrice.last_updated), { addSuffix: true }) : 'N/A'}
+              </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">24h High</CardTitle>
+              <CardTitle className="text-lg">Best DEX Price</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold font-mono text-primary">$44,120.50</div>
-              <div className="text-sm text-muted-foreground mt-1">Peak at 14:32 UTC</div>
+              {dexLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm">Fetching prices...</span>
+                </div>
+              ) : dexPrices?.bestQuote ? (
+                <>
+                  <div className="text-2xl font-bold font-mono text-primary">
+                    ${dexPrices.bestQuote.price.toFixed(2)}
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {dexPrices.bestQuote.dex}
+                  </div>
+                </>
+              ) : (
+                <div className="text-sm text-muted-foreground">Enter amount to see prices</div>
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">24h Low</CardTitle>
+              <CardTitle className="text-lg">24h Change</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold font-mono text-destructive">$42,180.00</div>
-              <div className="text-sm text-muted-foreground mt-1">Bottom at 08:15 UTC</div>
+              <div className={`text-2xl font-bold font-mono ${isPositive ? 'text-primary' : 'text-destructive'}`}>
+                ${Math.abs(currentPrice?.change_24h || 0).toFixed(2)}
+              </div>
+              <div className="text-sm text-muted-foreground mt-1">
+                {isPositive ? 'Gain' : 'Loss'} in 24h
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -103,46 +153,39 @@ export default function Trade() {
                   <div className="text-center text-muted-foreground">
                     <Activity className="h-12 w-12 mx-auto mb-2 opacity-50" />
                     <p>Chart visualization coming soon</p>
-                    <p className="text-sm mt-1">TradingView integration</p>
+                    <p className="text-sm mt-1">Real-time price charts</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Order Book</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs text-muted-foreground mb-2">
-                      <span>Price (USDT)</span>
-                      <span>Amount (BTC)</span>
-                      <span>Total (USDT)</span>
-                    </div>
-                    {mockOrderBook.asks.reverse().map((ask, index) => (
-                      <div key={index} className="flex justify-between text-sm font-mono">
-                        <span className="text-destructive">{ask.price.toFixed(2)}</span>
-                        <span>{ask.amount.toFixed(4)}</span>
-                        <span className="text-muted-foreground">{ask.total.toFixed(2)}</span>
-                      </div>
-                    ))}
-                    <div className="my-2 py-2 border-y border-border">
-                      <div className="text-center font-mono font-bold">43,250.00</div>
-                      <div className="text-center text-xs text-muted-foreground">Spread: $1.00</div>
-                    </div>
-                    {mockOrderBook.bids.map((bid, index) => (
-                      <div key={index} className="flex justify-between text-sm font-mono">
-                        <span className="text-primary">{bid.price.toFixed(2)}</span>
-                        <span>{bid.amount.toFixed(4)}</span>
-                        <span className="text-muted-foreground">{bid.total.toFixed(2)}</span>
+            {dexPrices && dexPrices.quotes.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>DEX Price Comparison</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {dexPrices.quotes.map((quote, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                        <div>
+                          <div className="font-semibold">{quote.dex}</div>
+                          <div className="text-sm text-muted-foreground">
+                            Liquidity: ${(quote.liquidity / 1000000).toFixed(2)}M
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-mono font-bold">${quote.price.toFixed(2)}</div>
+                          <div className="text-sm text-muted-foreground">
+                            Gas: ${quote.gasCostUSD.toFixed(2)}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -176,7 +219,7 @@ export default function Trade() {
                         <Label>Price (USDT)</Label>
                         <Input
                           type="number"
-                          placeholder="43,250.00"
+                          placeholder={currentPrice?.price.toFixed(2) || "0.00"}
                           value={price}
                           onChange={(e) => setPrice(e.target.value)}
                           className="font-mono"
@@ -184,8 +227,21 @@ export default function Trade() {
                       </div>
                     )}
 
+    {orderType === "stop" && (
+                      <div className="space-y-2">
+                        <Label>Stop Price (USDT)</Label>
+                        <Input
+                          type="number"
+                          placeholder={currentPrice?.price.toFixed(2) || "0.00"}
+                          value={stopPrice}
+                          onChange={(e) => setStopPrice(e.target.value)}
+                          className="font-mono"
+                        />
+                      </div>
+                    )}
+
                     <div className="space-y-2">
-                      <Label>Amount (BTC)</Label>
+                      <Label>Amount ({selectedPair})</Label>
                       <Input
                         type="number"
                         placeholder="0.0"
@@ -210,22 +266,23 @@ export default function Trade() {
                     </div>
 
                     <div className="space-y-2 pt-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Available:</span>
-                        <span className="font-mono">45,050.00 USDT</span>
-                      </div>
-                      {amount && (
+                      {amount && currentPrice && (
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Total:</span>
                           <span className="font-mono">
-                            {(parseFloat(amount) * 43250).toLocaleString()} USDT
+                            {(parseFloat(amount) * currentPrice.price).toLocaleString()} USDT
                           </span>
                         </div>
                       )}
                     </div>
 
-                    <Button className="w-full" size="lg" variant="success">
-                      Buy BTC
+                    <Button 
+                      className="w-full" 
+                      size="lg" 
+                      onClick={() => handlePlaceOrder('buy')}
+                      disabled={!amount || parseFloat(amount) <= 0}
+                    >
+                      Buy {selectedPair}
                     </Button>
                   </TabsContent>
                   <TabsContent value="sell" className="space-y-4">
@@ -248,7 +305,7 @@ export default function Trade() {
                         <Label>Price (USDT)</Label>
                         <Input
                           type="number"
-                          placeholder="43,250.00"
+                          placeholder={currentPrice?.price.toFixed(2) || "0.00"}
                           value={price}
                           onChange={(e) => setPrice(e.target.value)}
                           className="font-mono"
@@ -256,8 +313,21 @@ export default function Trade() {
                       </div>
                     )}
 
+                    {orderType === "stop" && (
+                      <div className="space-y-2">
+                        <Label>Stop Price (USDT)</Label>
+                        <Input
+                          type="number"
+                          placeholder={currentPrice?.price.toFixed(2) || "0.00"}
+                          value={stopPrice}
+                          onChange={(e) => setStopPrice(e.target.value)}
+                          className="font-mono"
+                        />
+                      </div>
+                    )}
+
                     <div className="space-y-2">
-                      <Label>Amount (BTC)</Label>
+                      <Label>Amount ({selectedPair})</Label>
                       <Input
                         type="number"
                         placeholder="0.0"
@@ -266,22 +336,21 @@ export default function Trade() {
                         className="font-mono"
                       />
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">25%</Button>
-                        <Button variant="outline" size="sm" className="flex-1">50%</Button>
-                        <Button variant="outline" size="sm" className="flex-1">75%</Button>
-                        <Button variant="outline" size="sm" className="flex-1">100%</Button>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => setAmount("0.25")}>25%</Button>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => setAmount("0.50")}>50%</Button>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => setAmount("0.75")}>75%</Button>
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => setAmount("1.00")}>100%</Button>
                       </div>
                     </div>
 
-                    <div className="space-y-2 pt-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Available:</span>
-                        <span className="font-mono">0.5432 BTC</span>
-                      </div>
-                    </div>
-
-                    <Button className="w-full" size="lg" variant="destructive">
-                      Sell BTC
+                    <Button 
+                      className="w-full" 
+                      size="lg" 
+                      variant="destructive"
+                      onClick={() => handlePlaceOrder('sell')}
+                      disabled={!amount || parseFloat(amount) <= 0}
+                    >
+                      Sell {selectedPair}
                     </Button>
                   </TabsContent>
                 </Tabs>
@@ -293,27 +362,51 @@ export default function Trade() {
                 <CardTitle>Open Orders</CardTitle>
               </CardHeader>
               <CardContent>
-                {mockOpenOrders.length > 0 ? (
+                {openOrders.length > 0 ? (
                   <div className="space-y-3">
-                    {mockOpenOrders.map((order, index) => (
-                      <div key={index} className="p-3 rounded-lg bg-muted/50 space-y-2">
+                    {openOrders.map((order) => (
+                      <div key={order.id} className="p-3 rounded-lg bg-muted/50 space-y-2">
                         <div className="flex items-center justify-between">
-                          <Badge variant="outline">{order.type}</Badge>
-                          <span className="text-xs text-muted-foreground">{order.pair}</span>
+                          <Badge variant={order.order_side === 'buy' ? 'default' : 'destructive'}>
+                            {order.order_type} {order.order_side}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {order.base_asset}/{order.quote_asset}
+                          </span>
                         </div>
                         <div className="text-sm space-y-1">
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Amount:</span>
                             <span className="font-mono">{order.amount}</span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Price:</span>
-                            <span className="font-mono">${order.price}</span>
-                          </div>
+                          {order.price && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Price:</span>
+                              <span className="font-mono">${order.price}</span>
+                            </div>
+                          )}
                         </div>
-                        <Button variant="outline" size="sm" className="w-full">
-                          Cancel Order
-                        </Button>
+                        <div className="flex gap-2">
+                          {order.order_type === 'limit' && (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="flex-1"
+                              onClick={() => executeOrder(order.id)}
+                            >
+                              Execute
+                            </Button>
+                          )}
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => cancelOrder(order.id)}
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
