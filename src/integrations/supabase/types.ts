@@ -315,6 +315,75 @@ export type Database = {
         }
         Relationships: []
       }
+      market_prices: {
+        Row: {
+          change_24h: number | null
+          change_24h_percent: number | null
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          market_cap: number | null
+          price: number
+          symbol: string
+          volume_24h: number | null
+        }
+        Insert: {
+          change_24h?: number | null
+          change_24h_percent?: number | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          market_cap?: number | null
+          price: number
+          symbol: string
+          volume_24h?: number | null
+        }
+        Update: {
+          change_24h?: number | null
+          change_24h_percent?: number | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          market_cap?: number | null
+          price?: number
+          symbol?: string
+          volume_24h?: number | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          metadata: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          metadata?: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          metadata?: Json | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           amount: number
