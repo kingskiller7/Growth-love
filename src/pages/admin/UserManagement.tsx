@@ -106,7 +106,7 @@ export default function UserManagement() {
                         <span className="text-sm">Verified</span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1 text-muted-foreground">
+                      <div className="flex items-center gap-1 text-warning">
                         <XCircle className="h-4 w-4" />
                         <span className="text-sm">Unverified</span>
                       </div>
