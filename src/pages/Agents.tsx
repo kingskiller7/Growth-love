@@ -6,10 +6,10 @@ import { Bot, Settings, AlertCircle, Plus, Activity, TrendingUp } from "lucide-r
 import { useAgents } from '@/hooks/useAgents';
 
 export default function Agents() {
-  const { agents, performance, loading } = useAgents();
+  const { agents, performance, loading, stopAllAgents, updateAgentStatus } = useAgents();
 
   const activeAgents = agents.filter(a => a.status === 'active').length;
-  const totalProfit = Object.values(performance).reduce((sum, p) => sum + Number(p.total_profit_usd || 0), 0);
+  const totalProfit = Object.values(performance).reduce((sum, p) => sum + Number(p.total_profit || 0), 0);
   const avgWinRate = Object.values(performance).reduce((sum, p) => sum + Number(p.win_rate || 0), 0) / (Object.keys(performance).length || 1);
   const totalTrades = Object.values(performance).reduce((sum, p) => sum + Number(p.total_trades || 0), 0);
 
@@ -32,7 +32,10 @@ export default function Agents() {
             <p className="text-muted-foreground">Monitor and manage trading agents</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="destructive">
+            <Button 
+              variant="destructive" 
+              onClick={() => stopAllAgents()}
+            >
               <AlertCircle className="h-4 w-4 mr-2" />
               Stop All
             </Button>
@@ -74,7 +77,7 @@ export default function Agents() {
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold font-mono">{(avgWinRate * 100).toFixed(0)}%</div>
+              <div className="text-3xl font-bold font-mono">{((avgWinRate || 0) * 100).toFixed(0)}%</div>
               <p className="text-xs text-muted-foreground mt-1">Success ratio</p>
             </CardContent>
           </Card>
@@ -138,8 +141,8 @@ export default function Agents() {
                       <div className="grid grid-cols-3 gap-4">
                         <div>
                           <p className="text-xs text-muted-foreground">Total Profit</p>
-                          <p className={`font-mono font-semibold mt-1 ${perf.total_profit_usd >= 0 ? 'text-primary' : 'text-destructive'}`}>
-                            ${perf.total_profit_usd.toFixed(2)}
+                          <p className={`font-mono font-semibold mt-1 ${Number(perf.total_profit) >= 0 ? 'text-primary' : 'text-destructive'}`}>
+                            ${Number(perf.total_profit).toFixed(2)}
                           </p>
                         </div>
                         <div>
@@ -148,7 +151,7 @@ export default function Agents() {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Win Rate</p>
-                          <p className="font-mono font-semibold mt-1">{(perf.win_rate * 100).toFixed(1)}%</p>
+                          <p className="font-mono font-semibold mt-1">{((perf.win_rate || 0) * 100).toFixed(1)}%</p>
                         </div>
                       </div>
                     ) : (
@@ -158,9 +161,16 @@ export default function Agents() {
                     )}
 
                     <div className="flex gap-2 pt-2">
-                      <Button variant="outline" className="flex-1">
+                      <Button 
+                        variant="outline" 
+                        className="flex-1"
+                        onClick={() => updateAgentStatus({ 
+                          id: agent.id, 
+                          status: agent.status === 'active' ? 'inactive' : 'active' 
+                        })}
+                      >
                         <Settings className="h-4 w-4 mr-2" />
-                        Configure
+                        {agent.status === 'active' ? 'Stop' : 'Start'}
                       </Button>
                       <Button variant="outline" className="flex-1">
                         View Logs

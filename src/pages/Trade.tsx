@@ -7,10 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Activity, Loader2, X } from "lucide-react";
+import { TrendingUp, Activity, Loader2, X, Sparkles } from "lucide-react";
 import { useMarketData } from "@/hooks/useMarketData";
 import { useOrders } from "@/hooks/useOrders";
 import { useDexPrices } from "@/hooks/useDexPrices";
+import { useAIAnalysis } from "@/hooks/useAIAnalysis";
+import { AISuggestionsPanel } from "@/components/ai/AISuggestionsPanel";
 import { formatDistanceToNow } from "date-fns";
 
 export default function Trade() {
@@ -19,10 +21,12 @@ export default function Trade() {
   const [amount, setAmount] = useState("");
   const [price, setPrice] = useState("");
   const [stopPrice, setStopPrice] = useState("");
+  const [showAIAnalysis, setShowAIAnalysis] = useState(false);
   
   const { prices: marketPrices, getPriceBySymbol } = useMarketData();
   const { openOrders, createOrder, cancelOrder, executeOrder } = useOrders();
   const { prices: dexPrices, fetchDexPrices, loading: dexLoading } = useDexPrices();
+  const { analyze, isAnalyzing, analysis } = useAIAnalysis();
 
   const currentPrice = getPriceBySymbol(selectedPair);
 
@@ -354,6 +358,55 @@ export default function Trade() {
                     </Button>
                   </TabsContent>
                 </Tabs>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>AI Insights</CardTitle>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      if (currentPrice) {
+                      analyze({
+                          type: 'trade_suggestion',
+                          data: {
+                            symbol: `${selectedPair}/USDT`,
+                            current_price: currentPrice.price,
+                            price_change_24h: currentPrice.change_24h_percent,
+                            volume_24h: currentPrice.volume_24h,
+                          }
+                        });
+                        setShowAIAnalysis(true);
+                      }
+                    }}
+                    disabled={isAnalyzing || !currentPrice}
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        Get AI Analysis
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {showAIAnalysis && analysis && (
+                  <div className="p-3 rounded-lg bg-secondary/50 border border-accent/20">
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {analysis.analysis}
+                    </p>
+                  </div>
+                )}
+                <AISuggestionsPanel symbol={`${selectedPair}/USDT`} />
               </CardContent>
             </Card>
 

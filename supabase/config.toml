@@ -8,3 +8,6 @@ verify_jwt = true
 
 [functions.dex-prices]
 verify_jwt = false
+
+[functions.ai-analysis]
+verify_jwt = true
