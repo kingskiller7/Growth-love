@@ -2,22 +2,40 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bot, Settings, AlertCircle, Plus, Activity, TrendingUp } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Bot, Settings, AlertCircle, Activity, TrendingUp, Shield } from "lucide-react";
 import { useAgents } from '@/hooks/useAgents';
+import { useAdmin } from '@/hooks/useAdmin';
 
 export default function Agents() {
   const { agents, performance, loading, stopAllAgents, updateAgentStatus } = useAgents();
+  const { isAdmin, loading: adminLoading } = useAdmin();
 
   const activeAgents = agents.filter(a => a.status === 'active').length;
   const totalProfit = Object.values(performance).reduce((sum, p) => sum + Number(p.total_profit || 0), 0);
   const avgWinRate = Object.values(performance).reduce((sum, p) => sum + Number(p.win_rate || 0), 0) / (Object.keys(performance).length || 1);
   const totalTrades = Object.values(performance).reduce((sum, p) => sum + Number(p.total_trades || 0), 0);
 
-  if (loading) {
+  if (loading || adminLoading) {
     return (
       <MainLayout>
         <div className="container px-4 py-6">
           <div className="text-center text-muted-foreground">Loading agents...</div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <MainLayout>
+        <div className="container px-4 py-6">
+          <Alert variant="destructive">
+            <Shield className="h-4 w-4" />
+            <AlertDescription>
+              Access Denied: AI Agent management is restricted to administrators only.
+            </AlertDescription>
+          </Alert>
         </div>
       </MainLayout>
     );
@@ -28,22 +46,22 @@ export default function Agents() {
       <div className="container px-4 py-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">AI Agents</h1>
-            <p className="text-muted-foreground">Monitor and manage trading agents</p>
+            <div className="flex items-center gap-2 mb-2">
+              <h1 className="text-3xl font-bold">AI Agents</h1>
+              <Badge variant="secondary" className="gap-1">
+                <Shield className="h-3 w-3" />
+                Admin Only
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">System-wide AI agents for automated operations</p>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              variant="destructive" 
-              onClick={() => stopAllAgents()}
-            >
-              <AlertCircle className="h-4 w-4 mr-2" />
-              Stop All
-            </Button>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Agent
-            </Button>
-          </div>
+          <Button 
+            variant="destructive" 
+            onClick={() => stopAllAgents()}
+          >
+            <AlertCircle className="h-4 w-4 mr-2" />
+            Emergency Stop All
+          </Button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
@@ -99,7 +117,7 @@ export default function Agents() {
             <Card>
               <CardContent className="py-12">
                 <div className="text-center text-muted-foreground">
-                  No AI agents configured yet. Create your first agent to start automated trading.
+                  No system agents found. They should have been created automatically during setup.
                 </div>
               </CardContent>
             </Card>
@@ -124,8 +142,13 @@ export default function Agents() {
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">
-                            {agent.strategy || 'No strategy set'}
+                            {agent.description || agent.strategy || 'No description'}
                           </p>
+                          {agent.config?.purpose && (
+                            <p className="text-xs text-muted-foreground/70 mt-1">
+                              Purpose: {agent.config.purpose.replace(/_/g, ' ')}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <Badge

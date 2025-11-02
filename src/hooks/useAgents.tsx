@@ -7,6 +7,7 @@ export interface Agent {
   id: string;
   user_id: string;
   name: string;
+  description?: string;
   strategy: string;
   status: string;
   risk_level: string;
@@ -15,6 +16,7 @@ export interface Agent {
   stop_loss_percentage: number | null;
   take_profit_percentage: number | null;
   configuration: any;
+  config?: any;
   created_at: string;
   updated_at: string;
 }
@@ -61,10 +63,10 @@ export function useAgents() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Fetch all system agents (admin-managed)
       const { data: agentsData, error: agentsError } = await supabase
         .from('agents' as any)
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (agentsError) throw agentsError;
@@ -103,6 +105,7 @@ export function useAgents() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Admin creates agents for the system
       const { data, error } = await supabase
         .from("agents" as any)
         .insert([{ ...agentData, user_id: user.id }])
@@ -161,10 +164,10 @@ export function useAgents() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Stop all active system agents
       const { error } = await supabase
         .from("agents" as any)
         .update({ status: 'inactive' })
-        .eq("user_id", user.id)
         .eq("status", "active");
 
       if (error) throw error;
