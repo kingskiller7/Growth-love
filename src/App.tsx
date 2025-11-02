@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import Trade from "./pages/Trade";
 import Portfolio from "./pages/Portfolio";
 import Agents from "./pages/Agents";
+import Algo from "./pages/Algo";
 import Menu from "./pages/Menu";
 import Wallet from "./pages/Wallet";
 import Deposit from "./pages/Deposit";
@@ -48,7 +49,7 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/trade" element={<ProtectedRoute><Trade /></ProtectedRoute>} />
             <Route path="/portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
-            <Route path="/agents" element={<ProtectedRoute><Agents /></ProtectedRoute>} />
+            <Route path="/algo" element={<ProtectedRoute><Algo /></ProtectedRoute>} />
             <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
             <Route path="/deposit" element={<ProtectedRoute><Deposit /></ProtectedRoute>} />
             <Route path="/withdraw" element={<ProtectedRoute><Withdraw /></ProtectedRoute>} />
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
             <Route path="/menu" element={<ProtectedRoute><Menu /></ProtectedRoute>} />
                 <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                <Route path="/admin/agents" element={<AdminRoute><Agents /></AdminRoute>} />
                 <Route path="/admin/pools" element={<AdminRoute><PoolManagement /></AdminRoute>} />
                 <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
                 <Route path="/admin/governance" element={<AdminRoute><GovernanceManagement /></AdminRoute>} />

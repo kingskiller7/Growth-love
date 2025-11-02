@@ -1,17 +1,16 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, ArrowUpRight, ArrowDownRight, Bot, DollarSign } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { TrendingUp, ArrowUpRight, ArrowDownRight, DollarSign, Zap } from "lucide-react";
 import { usePortfolio } from '@/hooks/usePortfolio';
 import { useTransactions } from '@/hooks/useTransactions';
-import { useAgents } from '@/hooks/useAgents';
+import { useAlgorithms } from '@/hooks/useAlgorithms';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
   const { portfolio, loading: portfolioLoading } = usePortfolio();
   const { transactions } = useTransactions();
-  const { agents } = useAgents();
+  const { algorithms } = useAlgorithms();
   const navigate = useNavigate();
 
   if (portfolioLoading) {
@@ -27,7 +26,7 @@ export default function Dashboard() {
   const portfolioValue = portfolio?.total_value_usd || 0;
   const change24h = portfolio?.change_24h || 0;
   const changePercent = portfolio?.change_24h_percent || 0;
-  const activeAgents = agents.filter(a => a.status === 'active').length;
+  const activeAlgos = algorithms.filter(a => a.is_active).length;
   const recentTransactions = transactions.slice(0, 4);
 
   return (
@@ -88,50 +87,19 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="game-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
-              <Bot className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Active Algos</CardTitle>
+              <Zap className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold font-mono">{activeAgents}</div>
-              <p className="text-xs text-muted-foreground mt-1">{agents.length} total</p>
+              <div className="text-2xl font-bold font-mono text-primary">{activeAlgos}</div>
+              <p className="text-xs text-muted-foreground mt-1">{algorithms.length} available</p>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>AI Agent Status</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {agents.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8">
-                  No AI agents configured yet
-                </div>
-              ) : (
-                agents.slice(0, 3).map((agent) => (
-                  <div key={agent.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full ${agent.status === 'active' ? 'bg-primary animate-pulse' : 'bg-muted-foreground'}`} />
-                      <div>
-                        <div className="font-semibold">{agent.name}</div>
-                        <div className="text-sm text-muted-foreground">{agent.status}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="secondary" className="bg-primary/10 text-primary">
-                        {agent.strategy || 'N/A'}
-                      </Badge>
-                    </div>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
+        <Card className="game-card">
             <CardHeader>
               <CardTitle>Recent Transactions</CardTitle>
             </CardHeader>
@@ -172,8 +140,7 @@ export default function Dashboard() {
                 )}
               </div>
             </CardContent>
-          </Card>
-        </div>
+        </Card>
       </div>
     </MainLayout>
   );

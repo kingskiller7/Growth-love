@@ -2,14 +2,27 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Shield, User, Settings, HelpCircle, LogOut, FileText, Bell } from "lucide-react";
+import { Shield, User, Settings, HelpCircle, LogOut, FileText, Bell, Bot } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 
 export default function Menu() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { isAdmin } = useAdmin();
+
+  const adminItems = isAdmin ? [
+    {
+      icon: Bot,
+      title: "Admin Panel",
+      description: "Manage system agents, pools, users, and governance",
+      onClick: () => navigate("/admin"),
+      variant: "default" as const,
+    },
+  ] : [];
 
   const menuItems = [
+    ...adminItems,
     {
       icon: Shield,
       title: "Security Settings",

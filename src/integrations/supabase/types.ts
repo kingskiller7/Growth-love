@@ -151,6 +151,69 @@ export type Database = {
         }
         Relationships: []
       }
+      algorithms: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          avg_profit_per_trade: number | null
+          category: string
+          config: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_system: boolean | null
+          name: string
+          risk_level: number | null
+          roi: number | null
+          status: string
+          success_ratio: number | null
+          total_trades: number | null
+          updated_at: string | null
+          win_rate: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          avg_profit_per_trade?: number | null
+          category: string
+          config?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system?: boolean | null
+          name: string
+          risk_level?: number | null
+          roi?: number | null
+          status?: string
+          success_ratio?: number | null
+          total_trades?: number | null
+          updated_at?: string | null
+          win_rate?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          avg_profit_per_trade?: number | null
+          category?: string
+          config?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system?: boolean | null
+          name?: string
+          risk_level?: number | null
+          roi?: number | null
+          status?: string
+          success_ratio?: number | null
+          total_trades?: number | null
+          updated_at?: string | null
+          win_rate?: number | null
+        }
+        Relationships: []
+      }
       dew_tokens: {
         Row: {
           balance: number
@@ -783,6 +846,38 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      user_algorithms: {
+        Row: {
+          algorithm_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          user_id: string
+        }
+        Insert: {
+          algorithm_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          user_id: string
+        }
+        Update: {
+          algorithm_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_algorithms_algorithm_id_fkey"
+            columns: ["algorithm_id"]
+            isOneToOne: false
+            referencedRelation: "algorithms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

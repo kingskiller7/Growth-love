@@ -50,6 +50,54 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 20%;
     --sidebar-ring: 160 100% 50%;
+
+    /* Gaming Elements */
+    --glow-primary: 160 100% 50%;
+    --glow-secondary: 280 100% 60%;
+    --xp-bar: 160 100% 50%;
+  }
+}
+
+/* Gaming Animations and Effects */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--glow-primary) / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(var(--glow-primary) / 0.8);
+  }
+}
+
+@keyframes level-up {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes card-hover {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
   }
 }
 
@@ -70,5 +118,43 @@ All colors MUST be HSL.
 
   .font-mono {
     font-family: 'Source Code Pro', 'JetBrains Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+  }
+
+  /* Gaming UI Classes */
+  .game-card {
+    @apply transition-all duration-300 hover:shadow-lg;
+    animation: card-hover 0.3s ease-in-out forwards;
+  }
+
+  .game-card:hover {
+    animation: card-hover 0.3s ease-in-out forwards;
+  }
+
+  .glow-border {
+    @apply border-2;
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+
+  .xp-bar {
+    @apply relative overflow-hidden rounded-full h-2 bg-muted;
+  }
+
+  .xp-bar-fill {
+    @apply absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent transition-all duration-500;
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--primary) / 0.3),
+      transparent
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 3s infinite;
+  }
+
+  .level-badge {
+    @apply inline-flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground font-bold;
   }
 }
