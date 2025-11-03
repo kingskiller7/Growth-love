@@ -1,4 +1,4 @@
-import { Home, TrendingUp, Wallet, Zap, Menu } from "lucide-react";
+import { Home, TrendingUp, Wallet, Zap, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -7,7 +7,7 @@ const navItems = [
   { icon: TrendingUp, label: "Trade", path: "/trade" },
   { icon: Wallet, label: "Wallet", path: "/wallet" },
   { icon: Zap, label: "Algo", path: "/algo" },
-  { icon: Menu, label: "Menu", path: "/menu" },
+  { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
 export const BottomNav = () => {

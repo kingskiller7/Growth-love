@@ -52,22 +52,11 @@ All colors MUST be HSL.
     --sidebar-ring: 160 100% 50%;
 
     /* Gaming Elements */
-    --glow-primary: 160 100% 50%;
-    --glow-secondary: 280 100% 60%;
     --xp-bar: 160 100% 50%;
   }
 }
 
 /* Gaming Animations and Effects */
-@keyframes glow-pulse {
-  0%, 100% {
-    box-shadow: 0 0 20px hsl(var(--glow-primary) / 0.4);
-  }
-  50% {
-    box-shadow: 0 0 40px hsl(var(--glow-primary) / 0.8);
-  }
-}
-
 @keyframes level-up {
   0% {
     transform: scale(1);
@@ -128,11 +117,6 @@ All colors MUST be HSL.
 
   .game-card:hover {
     animation: card-hover 0.3s ease-in-out forwards;
-  }
-
-  .glow-border {
-    @apply border-2;
-    animation: glow-pulse 2s ease-in-out infinite;
   }
 
   .xp-bar {

@@ -18,7 +18,7 @@ import Trade from "./pages/Trade";
 import Portfolio from "./pages/Portfolio";
 import Agents from "./pages/Agents";
 import Algo from "./pages/Algo";
-import Menu from "./pages/Menu";
+import Settings from "./pages/Settings";
 import Wallet from "./pages/Wallet";
 import Deposit from "./pages/Deposit";
 import Withdraw from "./pages/Withdraw";
@@ -55,7 +55,7 @@ const App = () => (
             <Route path="/withdraw" element={<ProtectedRoute><Withdraw /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
             <Route path="/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
-            <Route path="/menu" element={<ProtectedRoute><Menu /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                 <Route path="/admin/agents" element={<AdminRoute><Agents /></AdminRoute>} />
                 <Route path="/admin/pools" element={<AdminRoute><PoolManagement /></AdminRoute>} />
