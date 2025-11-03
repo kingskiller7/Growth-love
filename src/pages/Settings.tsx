@@ -54,28 +54,28 @@ export default function Settings() {
 
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 max-w-4xl space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Settings</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Settings</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage your account settings and preferences
           </p>
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {menuItems.map((item, index) => (
             <Card 
               key={index} 
               className="cursor-pointer hover:border-primary transition-colors"
               onClick={item.onClick}
             >
-              <CardHeader className="flex flex-row items-center gap-4 pb-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <item.icon className="h-6 w-6 text-primary" />
+              <CardHeader className="flex flex-row items-center gap-3 sm:gap-4 pb-2 sm:pb-3 p-4 sm:p-6">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
+                  <item.icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </div>
-                <div className="flex-1">
-                  <CardTitle className="text-lg">{item.title}</CardTitle>
-                  <CardDescription className="text-sm">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base sm:text-lg truncate">{item.title}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm line-clamp-1">
                     {item.description}
                   </CardDescription>
                 </div>
@@ -85,16 +85,16 @@ export default function Settings() {
         </div>
 
         <Card className="border-destructive/50">
-          <CardHeader>
-            <CardTitle className="text-destructive flex items-center gap-2">
-              <LogOut className="h-5 w-5" />
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg text-destructive flex items-center gap-2">
+              <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
               Sign Out
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Log out of your account on this device
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
             <Button 
               variant="destructive" 
               onClick={handleSignOut}

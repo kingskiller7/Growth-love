@@ -65,14 +65,14 @@ export default function Trade() {
 
   return (
     <MainLayout>
-      <div className="container px-4 py-6 space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="container px-4 sm:px-6 py-4 sm:py-6 space-y-3 sm:space-y-4 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Trade</h1>
-            <p className="text-muted-foreground">Execute trades with best price discovery</p>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Trade</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Execute trades with best price discovery</p>
           </div>
           <Select value={selectedPair} onValueChange={setSelectedPair}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -85,61 +85,61 @@ export default function Trade() {
           </Select>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-2 sm:pb-3 p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{selectedPair}/USDT</CardTitle>
-                <Badge variant={isPositive ? "default" : "destructive"}>
-                  <TrendingUp className="h-3 w-3 mr-1" />
+                <CardTitle className="text-base sm:text-lg">{selectedPair}/USDT</CardTitle>
+                <Badge variant={isPositive ? "default" : "destructive"} className="text-xs">
+                  <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                   {isPositive ? '+' : ''}{change24h.toFixed(2)}%
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold font-mono">
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-2xl sm:text-3xl font-bold font-mono">
                 ${currentPrice?.price.toFixed(2) || '0.00'}
               </div>
-              <div className="text-sm text-muted-foreground mt-1">
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">
                 Last updated: {currentPrice ? formatDistanceToNow(new Date(currentPrice.last_updated), { addSuffix: true }) : 'N/A'}
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Best DEX Price</CardTitle>
+            <CardHeader className="pb-2 sm:pb-3 p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Best DEX Price</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
               {dexLoading ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm">Fetching prices...</span>
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                  <span className="text-xs sm:text-sm">Fetching prices...</span>
                 </div>
               ) : dexPrices?.bestQuote ? (
                 <>
-                  <div className="text-2xl font-bold font-mono text-primary">
+                  <div className="text-xl sm:text-2xl font-bold font-mono text-primary">
                     ${dexPrices.bestQuote.price.toFixed(2)}
                   </div>
-                  <div className="text-sm text-muted-foreground mt-1">
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">
                     {dexPrices.bestQuote.dex}
                   </div>
                 </>
               ) : (
-                <div className="text-sm text-muted-foreground">Enter amount to see prices</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Enter amount to see prices</div>
               )}
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">24h Change</CardTitle>
+            <CardHeader className="pb-2 sm:pb-3 p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">24h Change</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold font-mono ${isPositive ? 'text-primary' : 'text-destructive'}`}>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className={`text-xl sm:text-2xl font-bold font-mono ${isPositive ? 'text-primary' : 'text-destructive'}`}>
                 ${Math.abs(currentPrice?.change_24h || 0).toFixed(2)}
               </div>
-              <div className="text-sm text-muted-foreground mt-1">
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">
                 {isPositive ? 'Gain' : 'Loss'} in 24h
               </div>
             </CardContent>

@@ -32,14 +32,14 @@ export default function Deposit() {
 
   return (
     <MainLayout showBottomNav={false}>
-      <div className="container max-w-2xl px-4 py-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/wallet")}>
-            <ArrowLeft className="h-5 w-5" />
+      <div className="container max-w-2xl px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/wallet")} className="shrink-0">
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Deposit</h1>
-            <p className="text-muted-foreground">Add funds to your wallet</p>
+            <h1 className="text-2xl sm:text-3xl font-bold">Deposit</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Add funds to your wallet</p>
           </div>
         </div>
 
@@ -88,16 +88,16 @@ export default function Deposit() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Deposit Address</CardTitle>
-            <CardDescription>Send {selectedAsset} to this address</CardDescription>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Deposit Address</CardTitle>
+            <CardDescription className="text-sm">Send {selectedAsset} to this address</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex justify-center p-8 bg-white rounded-lg">
-              <div className="w-48 h-48 bg-muted rounded-lg flex items-center justify-center">
+          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div className="flex justify-center p-4 sm:p-8 bg-white rounded-lg">
+              <div className="w-36 h-36 sm:w-48 sm:h-48 bg-muted rounded-lg flex items-center justify-center">
                 <div className="text-center">
-                  <QrCodeIcon className="w-16 h-16 mx-auto text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground mt-2">QR Code</p>
+                  <QrCodeIcon className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground" />
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">QR Code</p>
                 </div>
               </div>
             </div>

@@ -28,27 +28,27 @@ export default function Portfolio() {
 
   return (
     <MainLayout>
-      <div className="container px-4 py-6 space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="container px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Portfolio</h1>
-            <p className="text-muted-foreground">Track and manage your assets</p>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Portfolio</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Track and manage your assets</p>
           </div>
-          <Button>
-            <ArrowUpRight className="h-4 w-4 mr-2" />
-            Rebalance
+          <Button className="w-full sm:w-auto">
+            <ArrowUpRight className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Rebalance</span>
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Value</CardTitle>
-              <PieChart className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Total Value</CardTitle>
+              <PieChart className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold font-mono">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-              <p className="text-xs text-muted-foreground mt-1">Across {holdings.length} assets</p>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-2xl sm:text-3xl font-bold font-mono">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Across {holdings.length} assets</p>
             </CardContent>
           </Card>
 
@@ -81,8 +81,8 @@ export default function Portfolio() {
           </Card>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="md:col-span-2">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
+          <Card className="lg:col-span-2">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Holdings</CardTitle>
