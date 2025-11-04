@@ -24,6 +24,9 @@ import Deposit from "./pages/Deposit";
 import Withdraw from "./pages/Withdraw";
 import Analytics from "./pages/Analytics";
 import SecuritySettings from "./pages/SecuritySettings";
+import Terms from "./pages/Terms";
+import Help from "./pages/Help";
+import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PoolManagement from "./pages/admin/PoolManagement";
 import UserManagement from "./pages/admin/UserManagement";
@@ -56,6 +59,9 @@ const App = () => (
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
             <Route path="/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/terms" element={<ProtectedRoute><Terms /></ProtectedRoute>} />
+            <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
                 <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
                 <Route path="/admin/agents" element={<AdminRoute><Agents /></AdminRoute>} />
                 <Route path="/admin/pools" element={<AdminRoute><PoolManagement /></AdminRoute>} />
