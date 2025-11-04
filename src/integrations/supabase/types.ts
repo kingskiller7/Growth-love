@@ -50,6 +50,41 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_logs: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          log_level: string
+          message: string
+          metadata: Json | null
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          log_level: string
+          message: string
+          metadata?: Json | null
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          log_level?: string
+          message?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_logs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_performance: {
         Row: {
           agent_id: string
@@ -103,6 +138,78 @@ export type Database = {
           },
         ]
       }
+      agent_trades: {
+        Row: {
+          action: string
+          agent_id: string
+          amount: number
+          confidence_score: number | null
+          created_at: string
+          error_message: string | null
+          executed_at: string | null
+          execution_time: number | null
+          id: string
+          order_id: string | null
+          price: number
+          profit_loss: number | null
+          profit_loss_percent: number | null
+          status: string
+          strategy_used: string | null
+          trading_pair: string
+        }
+        Insert: {
+          action: string
+          agent_id: string
+          amount: number
+          confidence_score?: number | null
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          execution_time?: number | null
+          id?: string
+          order_id?: string | null
+          price: number
+          profit_loss?: number | null
+          profit_loss_percent?: number | null
+          status?: string
+          strategy_used?: string | null
+          trading_pair: string
+        }
+        Update: {
+          action?: string
+          agent_id?: string
+          amount?: number
+          confidence_score?: number | null
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string | null
+          execution_time?: number | null
+          id?: string
+          order_id?: string | null
+          price?: number
+          profit_loss?: number | null
+          profit_loss_percent?: number | null
+          status?: string
+          strategy_used?: string | null
+          trading_pair?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_trades_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_trades_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agents: {
         Row: {
           config: Json | null
@@ -146,6 +253,60 @@ export type Database = {
           status?: Database["public"]["Enums"]["agent_status"]
           strategy?: string | null
           trading_pairs?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_suggestions: {
+        Row: {
+          accepted_at: string | null
+          action: string | null
+          confidence: number | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          reasoning: string
+          status: string
+          stop_loss: number | null
+          suggestion_type: string
+          take_profit: number | null
+          target_price: number | null
+          trading_pair: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          action?: string | null
+          confidence?: number | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          reasoning: string
+          status?: string
+          stop_loss?: number | null
+          suggestion_type: string
+          take_profit?: number | null
+          target_price?: number | null
+          trading_pair?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          action?: string | null
+          confidence?: number | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          reasoning?: string
+          status?: string
+          stop_loss?: number | null
+          suggestion_type?: string
+          take_profit?: number | null
+          target_price?: number | null
+          trading_pair?: string | null
           updated_at?: string
           user_id?: string
         }

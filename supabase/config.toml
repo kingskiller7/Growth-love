@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.ai-analysis]
 verify_jwt = true
+
+[functions.agent-manager]
+verify_jwt = true
+
+[functions.agent-trader]
+verify_jwt = true
