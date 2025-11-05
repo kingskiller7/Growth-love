@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Bot, Shield, Zap } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import AppLanding from "./AppLanding";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -25,10 +24,12 @@ const Index = () => {
     }
   }, [user, loading, navigate]);
 
-  // Show App Landing Page for desktop users
-  if (isDesktop && !user) {
-    return <AppLanding />;
-  }
+  // Redirect desktop users to app landing page
+  useEffect(() => {
+    if (isDesktop && !user && !loading) {
+      navigate("/app-landing");
+    }
+  }, [isDesktop, user, loading, navigate]);
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="container px-4 py-16">
