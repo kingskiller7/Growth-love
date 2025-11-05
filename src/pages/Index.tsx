@@ -1,19 +1,34 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Bot, Shield, Zap } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import AppLanding from "./AppLanding";
 
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const isMobileDevice = useIsMobile();
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Detect if user is on desktop (not mobile/tablet)
+  useEffect(() => {
+    const isDesktopDevice = !isMobileDevice && window.innerWidth >= 1024;
+    setIsDesktop(isDesktopDevice);
+  }, [isMobileDevice]);
 
   useEffect(() => {
     if (!loading && user) {
       navigate("/dashboard");
     }
   }, [user, loading, navigate]);
+
+  // Show App Landing Page for desktop users
+  if (isDesktop && !user) {
+    return <AppLanding />;
+  }
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="container px-4 py-16">
