@@ -1,11 +1,23 @@
 import QRCode from "react-qr-code";
 import { Button } from "@/components/ui/button";
-import { Bot, TrendingUp, Shield, Zap, Smartphone, Download } from "lucide-react";
+import { Bot, TrendingUp, Shield, Zap, Smartphone, Download, CheckCircle2 } from "lucide-react";
+import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { toast } from "sonner";
 
 const AppLanding = () => {
-  // This URL should point to your latest APK hosted somewhere
-  // For now using a placeholder - replace with your actual APK URL
-  const apkDownloadUrl = "https://your-domain.com/downloads/growth-latest.apk";
+  const { isInstallable, isInstalled, installApp } = usePWAInstall();
+  
+  // The actual URL users will scan to access and install the PWA
+  const appUrl = "https://73711044-afd6-4399-898c-338635b92e17.lovableproject.com";
+  
+  const handleInstall = async () => {
+    const success = await installApp();
+    if (success) {
+      toast.success("App installation started!");
+    } else if (!isInstallable) {
+      toast.info("App is already installed or not installable on this device");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary">
@@ -44,16 +56,30 @@ const AppLanding = () => {
             </div>
 
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">The mobile app is available now</p>
+              {isInstalled ? (
+                <div className="flex items-center gap-2 text-primary">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <p className="text-sm font-medium">App is installed!</p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">The mobile app is available now</p>
+              )}
               <div className="flex gap-4">
-                <Button size="lg" className="gap-2">
-                  <Download className="h-5 w-5" />
-                  Download APK
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <a href="/register">Get Started Web</a>
+                {isInstallable && !isInstalled && (
+                  <Button size="lg" className="gap-2" onClick={handleInstall}>
+                    <Download className="h-5 w-5" />
+                    Install App
+                  </Button>
+                )}
+                <Button size="lg" variant={isInstallable ? "outline" : "default"} asChild>
+                  <a href="/register">Get Started</a>
                 </Button>
               </div>
+              {!isInstallable && !isInstalled && (
+                <p className="text-xs text-muted-foreground">
+                  On mobile: Tap browser menu → "Add to Home Screen" to install
+                </p>
+              )}
             </div>
           </div>
 
@@ -64,21 +90,29 @@ const AppLanding = () => {
               <div className="relative bg-card border-2 border-border rounded-3xl p-8 shadow-2xl">
                 <div className="space-y-4 text-center">
                   <Smartphone className="h-12 w-12 text-primary mx-auto" />
-                  <h3 className="text-xl font-semibold">Scan to Download</h3>
+                  <h3 className="text-xl font-semibold">Scan to Install</h3>
                   <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                    Scan this QR code with your mobile device to download the latest version of Growth
+                    Scan this QR code with your mobile device to access and install Growth PWA
                   </p>
                   <div className="bg-white p-6 rounded-xl">
                     <QRCode
-                      value={apkDownloadUrl}
+                      value={appUrl}
                       size={200}
                       level="H"
                       fgColor="#000000"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Always updated to the latest version
+                    Works offline • Updates automatically • No app store needed
                   </p>
+                  <a 
+                    href={appUrl} 
+                    className="text-xs text-primary hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {appUrl}
+                  </a>
                 </div>
               </div>
             </div>
@@ -194,11 +228,18 @@ const AppLanding = () => {
         <div className="max-w-2xl mx-auto space-y-6">
           <h2 className="text-4xl font-bold">JOIN OUR COMMUNITY</h2>
           <p className="text-lg text-muted-foreground">
-            Become a user of our mobile app and your travels will become more enjoyable and amazing
+            Start trading smarter with AI-powered strategies and secure self-custody wallet
           </p>
-          <Button size="lg" className="text-lg px-8">
-            Download App
-          </Button>
+          {isInstallable && !isInstalled ? (
+            <Button size="lg" className="text-lg px-8" onClick={handleInstall}>
+              <Download className="h-5 w-5 mr-2" />
+              Install App Now
+            </Button>
+          ) : (
+            <Button size="lg" className="text-lg px-8" asChild>
+              <a href="/register">Get Started</a>
+            </Button>
+          )}
         </div>
       </section>
 
