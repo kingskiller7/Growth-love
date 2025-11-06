@@ -32,7 +32,7 @@ import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import PoolManagement from "./pages/admin/PoolManagement";
 import UserManagement from "./pages/admin/UserManagement";
-import GovernanceManagement from "./pages/admin/GovernanceManagement";
+import AlgorithmManagement from "./pages/admin/AlgorithmManagement";
 import MakeUserAdmin from "./pages/admin/MakeUserAdmin";
 
 const queryClient = new QueryClient();
@@ -69,7 +69,7 @@ const App = () => (
                 <Route path="/admin/agents" element={<AdminRoute><Agents /></AdminRoute>} />
                 <Route path="/admin/pools" element={<AdminRoute><PoolManagement /></AdminRoute>} />
                 <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
-                <Route path="/admin/governance" element={<AdminRoute><GovernanceManagement /></AdminRoute>} />
+                <Route path="/admin/algorithms" element={<AdminRoute><AlgorithmManagement /></AdminRoute>} />
                 <Route path="/admin/make-admin" element={<AdminRoute><MakeUserAdmin /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

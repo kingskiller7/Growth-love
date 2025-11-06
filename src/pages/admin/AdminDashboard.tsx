@@ -130,11 +130,11 @@ export default function AdminDashboard() {
                 <span className="font-medium">Pool Management</span>
               </button>
               <button
-                onClick={() => navigate('/admin/governance')}
+                onClick={() => navigate('/admin/algorithms')}
                 className="w-full px-4 py-3 text-left hover:bg-primary/10 rounded-lg transition-all hover:translate-x-1 flex items-center gap-3 group"
               >
                 <Activity className="h-5 w-5 text-accent group-hover:scale-110 transition-transform" />
-                <span className="font-medium">Governance</span>
+                <span className="font-medium">Algorithm Management</span>
               </button>
               <button
                 onClick={() => navigate('/admin/make-admin')}
