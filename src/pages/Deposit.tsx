@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Copy, Check, Info, QrCode as QrCodeIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTransactions } from "@/hooks/useTransactions";
+import { useDeposit } from "@/hooks/useDeposit";
+import QRCode from "react-qr-code";
 
 const supportedAssets = [
   { symbol: "BTC", name: "Bitcoin", network: "Bitcoin", minDeposit: 0.0001 },
@@ -20,9 +23,15 @@ export default function Deposit() {
   const navigate = useNavigate();
   const [selectedAsset, setSelectedAsset] = useState("BTC");
   const [copied, setCopied] = useState(false);
+  const { transactions } = useTransactions();
+  const { createDeposit } = useDeposit();
   
   const depositAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa";
   const asset = supportedAssets.find(a => a.symbol === selectedAsset);
+  
+  const recentDeposits = transactions
+    .filter(tx => tx.transaction_type === 'deposit')
+    .slice(0, 5);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(depositAddress);
@@ -94,12 +103,11 @@ export default function Deposit() {
           </CardHeader>
           <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div className="flex justify-center p-4 sm:p-8 bg-white rounded-lg">
-              <div className="w-36 h-36 sm:w-48 sm:h-48 bg-muted rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <QrCodeIcon className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-muted-foreground" />
-                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">QR Code</p>
-                </div>
-              </div>
+              <QRCode
+                value={depositAddress}
+                size={192}
+                className="w-36 h-36 sm:w-48 sm:h-48"
+              />
             </div>
 
             <div className="space-y-2">
@@ -146,9 +154,33 @@ export default function Deposit() {
             <CardTitle>Recent Deposits</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No recent deposits
-            </p>
+            {recentDeposits.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No recent deposits
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {recentDeposits.map((tx) => (
+                  <div key={tx.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div>
+                      <p className="font-medium">{tx.asset_symbol}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(tx.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-mono">{tx.amount} {tx.asset_symbol}</p>
+                      <Badge 
+                        variant={tx.status === 'completed' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {tx.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
