@@ -17,3 +17,18 @@ verify_jwt = true
 
 [functions.agent-trader]
 verify_jwt = true
+
+[functions.pool-manager]
+verify_jwt = true
+
+[functions.risk-manager]
+verify_jwt = false
+
+[functions.backtest-engine]
+verify_jwt = true
+
+[functions.analytics-engine]
+verify_jwt = true
+
+[functions.trading-strategist]
+verify_jwt = true
