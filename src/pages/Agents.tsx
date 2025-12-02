@@ -1,4 +1,4 @@
-import { MainLayout } from "@/components/layout/MainLayout";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,32 +18,28 @@ export default function Agents() {
 
   if (loading || adminLoading) {
     return (
-      <MainLayout>
-        <div className="container px-4 py-6">
-          <div className="text-center text-muted-foreground">Loading agents...</div>
-        </div>
-      </MainLayout>
+      <AdminLayout>
+        <div className="text-center text-muted-foreground">Loading agents...</div>
+      </AdminLayout>
     );
   }
 
   if (!isAdmin) {
     return (
-      <MainLayout>
-        <div className="container px-4 py-6">
-          <Alert variant="destructive">
-            <Shield className="h-4 w-4" />
-            <AlertDescription>
-              Access Denied: AI Agent management is restricted to administrators only.
-            </AlertDescription>
-          </Alert>
-        </div>
-      </MainLayout>
+      <AdminLayout>
+        <Alert variant="destructive">
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            Access Denied: AI Agent management is restricted to administrators only.
+          </AlertDescription>
+        </Alert>
+      </AdminLayout>
     );
   }
 
   return (
-    <MainLayout>
-      <div className="container px-4 py-6 space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -225,6 +221,6 @@ export default function Agents() {
           )}
         </div>
       </div>
-    </MainLayout>
+    </AdminLayout>
   );
 }
