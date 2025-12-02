@@ -30,6 +30,10 @@ import Terms from "./pages/Terms";
 import Help from "./pages/Help";
 import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminBacktest from "./pages/admin/AdminBacktest";
+import AdminSecurity from "./pages/admin/AdminSecurity";
+import AdminSettings from "./pages/admin/AdminSettings";
 import PoolManagement from "./pages/admin/PoolManagement";
 import UserManagement from "./pages/admin/UserManagement";
 import AlgorithmManagement from "./pages/admin/AlgorithmManagement";
@@ -45,9 +49,9 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/app-landing" element={<AppLanding />} />
-          <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/app-landing" element={<AppLanding />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/profile-setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
@@ -65,12 +69,17 @@ const App = () => (
             <Route path="/terms" element={<ProtectedRoute><Terms /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-                <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-                <Route path="/admin/agents" element={<AdminRoute><Agents /></AdminRoute>} />
-                <Route path="/admin/pools" element={<AdminRoute><PoolManagement /></AdminRoute>} />
-                <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
-                <Route path="/admin/algorithms" element={<AdminRoute><AlgorithmManagement /></AdminRoute>} />
-                <Route path="/admin/make-admin" element={<AdminRoute><MakeUserAdmin /></AdminRoute>} />
+            {/* Admin Routes with separate layout */}
+            <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="/admin/agents" element={<AdminRoute><Agents /></AdminRoute>} />
+            <Route path="/admin/pools" element={<AdminRoute><PoolManagement /></AdminRoute>} />
+            <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+            <Route path="/admin/algorithms" element={<AdminRoute><AlgorithmManagement /></AdminRoute>} />
+            <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+            <Route path="/admin/backtest" element={<AdminRoute><AdminBacktest /></AdminRoute>} />
+            <Route path="/admin/security" element={<AdminRoute><AdminSecurity /></AdminRoute>} />
+            <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+            <Route path="/admin/make-admin" element={<AdminRoute><MakeUserAdmin /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
