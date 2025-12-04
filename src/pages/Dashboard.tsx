@@ -6,6 +6,8 @@ import { usePortfolio } from '@/hooks/usePortfolio';
 import { useTransactions } from '@/hooks/useTransactions';
 import { useAlgorithms } from '@/hooks/useAlgorithms';
 import { useNavigate } from 'react-router-dom';
+import { LivePricesWidget } from '@/components/dashboard/LivePricesWidget';
+import { AgentStatusWidget } from '@/components/dashboard/AgentStatusWidget';
 
 export default function Dashboard() {
   const { portfolio, loading: portfolioLoading } = usePortfolio();
@@ -99,7 +101,12 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <Card>
+        {/* Live Prices Widget */}
+        <LivePricesWidget />
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          {/* Recent Transactions */}
+          <Card>
             <CardHeader className="p-4 sm:p-6">
               <CardTitle className="text-lg sm:text-xl">Recent Transactions</CardTitle>
             </CardHeader>
@@ -140,7 +147,11 @@ export default function Dashboard() {
                 )}
               </div>
             </CardContent>
-        </Card>
+          </Card>
+
+          {/* AI Agent Status Widget */}
+          <AgentStatusWidget />
+        </div>
       </div>
     </MainLayout>
   );
