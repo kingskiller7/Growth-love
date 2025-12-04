@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,6 +9,7 @@ const corsHeaders = {
 const DEX_APIS = {
   uniswap: "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3",
   pancakeswap: "https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc",
+  biswap: "https://api.thegraph.com/subgraphs/name/biswap-org/exchange5",
   sushiswap: "https://api.thegraph.com/subgraphs/name/sushiswap/exchange",
 };
 
@@ -19,6 +19,7 @@ const TOKEN_ADDRESSES = {
   WBTC: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
   USDT: "0xdac17f958d2ee523a2206206994597c13d831ec7",
   USDC: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  BNB: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
 };
 
 serve(async (req) => {
@@ -129,10 +130,11 @@ async function fetchLiveDexPrices() {
       timestamp: new Date().toISOString(),
     }));
 
-    // Also fetch DEX-specific liquidity data
+    // Also fetch DEX-specific liquidity data from multiple DEXs
     const dexData = await Promise.allSettled([
       fetchUniswapData(),
       fetchPancakeSwapData(),
+      fetchBiswapData(),
     ]);
 
     return {
@@ -171,10 +173,11 @@ async function fetchUniswapData() {
     const data = await response.json();
     return {
       dex: "Uniswap",
+      chain: "Ethereum",
       pools: data.data?.pools || [],
     };
   } catch {
-    return { dex: "Uniswap", pools: [], error: "Failed to fetch" };
+    return { dex: "Uniswap", chain: "Ethereum", pools: [], error: "Failed to fetch" };
   }
 }
 
@@ -201,26 +204,73 @@ async function fetchPancakeSwapData() {
     const data = await response.json();
     return {
       dex: "PancakeSwap",
+      chain: "BSC",
       pools: data.data?.pools || [],
     };
   } catch {
-    return { dex: "PancakeSwap", pools: [], error: "Failed to fetch" };
+    return { dex: "PancakeSwap", chain: "BSC", pools: [], error: "Failed to fetch" };
+  }
+}
+
+async function fetchBiswapData() {
+  const query = `
+    query {
+      pairs(first: 10, orderBy: reserveUSD, orderDirection: desc) {
+        id
+        token0 { symbol }
+        token1 { symbol }
+        reserveUSD
+        volumeUSD
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch(DEX_APIS.biswap, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+
+    const data = await response.json();
+    return {
+      dex: "Biswap",
+      chain: "BSC",
+      pools: (data.data?.pairs || []).map((p: any) => ({
+        id: p.id,
+        token0: p.token0,
+        token1: p.token1,
+        totalValueLockedUSD: p.reserveUSD,
+        volumeUSD: p.volumeUSD,
+      })),
+    };
+  } catch {
+    return { dex: "Biswap", chain: "BSC", pools: [], error: "Failed to fetch" };
   }
 }
 
 async function getDexQuote(dex: string, pair: string, amount: number) {
-  // Simulate DEX quote - in production, this would call actual DEX routers
+  // Simulate DEX quote with realistic pricing based on DEX
+  const dexFees: { [key: string]: number } = {
+    Uniswap: 0.3,
+    PancakeSwap: 0.25,
+    Biswap: 0.1,
+    SushiSwap: 0.3,
+  };
+  
   const basePrice = Math.random() * 1000 + 100;
   const slippage = amount > 10000 ? 0.5 : 0.1;
+  const fee = dexFees[dex] || 0.3;
   
   return {
     dex,
     pair,
     amount,
     price: basePrice,
+    fee,
     slippage,
-    estimatedOutput: amount / basePrice * (1 - slippage / 100),
-    gas: Math.floor(Math.random() * 100000) + 50000,
+    estimatedOutput: amount / basePrice * (1 - (slippage + fee) / 100),
+    gas: dex === 'Uniswap' ? Math.floor(Math.random() * 50000) + 100000 : Math.floor(Math.random() * 30000) + 50000,
     timestamp: new Date().toISOString(),
   };
 }

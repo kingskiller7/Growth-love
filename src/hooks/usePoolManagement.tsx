@@ -53,8 +53,47 @@ export function usePoolManagement() {
     }
   };
 
+  const rebalancePools = async () => {
+    setLoading(true);
+    try {
+      const { data: pools } = await supabase.from('pools').select('id');
+      
+      if (!pools || pools.length === 0) {
+        toast({
+          title: 'No Pools Found',
+          description: 'No pools available to rebalance',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Rebalance all pools
+      for (const pool of pools) {
+        await managePool({
+          action: 'rebalance',
+          poolId: pool.id,
+        });
+      }
+
+      toast({
+        title: 'Rebalance Complete',
+        description: 'All pools have been rebalanced successfully',
+      });
+    } catch (error) {
+      console.error('Error rebalancing pools:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to rebalance pools',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     managePool,
+    rebalancePools,
   };
 }
