@@ -7,7 +7,6 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useAlgorithms } from '@/hooks/useAlgorithms';
 import { useNavigate } from 'react-router-dom';
 import { LivePricesWidget } from '@/components/dashboard/LivePricesWidget';
-import { AgentStatusWidget } from '@/components/dashboard/AgentStatusWidget';
 
 export default function Dashboard() {
   const { portfolio, loading: portfolioLoading } = usePortfolio();
@@ -104,54 +103,49 @@ export default function Dashboard() {
         {/* Live Prices Widget */}
         <LivePricesWidget />
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          {/* Recent Transactions */}
-          <Card>
-            <CardHeader className="p-4 sm:p-6">
-              <CardTitle className="text-lg sm:text-xl">Recent Transactions</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-              <div className="space-y-2 sm:space-y-3">
-                {recentTransactions.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-6 sm:py-8 text-sm sm:text-base">
-                    No transactions yet
-                  </div>
-                ) : (
-                  recentTransactions.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-muted/50">
-                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 ${
-                          tx.transaction_type === "deposit" ? "bg-primary/20" : tx.transaction_type === "withdrawal" ? "bg-destructive/20" : "bg-muted"
-                        }`}>
-                          {tx.transaction_type === "deposit" ? (
-                            <ArrowDownRight className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                          ) : tx.transaction_type === "withdrawal" ? (
-                            <ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4 text-destructive" />
-                          ) : (
-                            <ArrowDownRight className="h-3 w-3 sm:h-4 sm:w-4" />
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-semibold capitalize text-sm sm:text-base truncate">{tx.transaction_type} {tx.asset_symbol}</div>
-                          <div className="text-xs sm:text-sm text-muted-foreground">
-                            {new Date(tx.created_at).toLocaleDateString()}
-                          </div>
-                        </div>
+        {/* Recent Transactions - Full Width */}
+        <Card>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Recent Transactions</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+            <div className="grid gap-2 sm:gap-3 sm:grid-cols-2">
+              {recentTransactions.length === 0 ? (
+                <div className="text-center text-muted-foreground py-6 sm:py-8 text-sm sm:text-base col-span-2">
+                  No transactions yet
+                </div>
+              ) : (
+                recentTransactions.map((tx) => (
+                  <div key={tx.id} className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg bg-muted/50">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                      <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 ${
+                        tx.transaction_type === "deposit" ? "bg-primary/20" : tx.transaction_type === "withdrawal" ? "bg-destructive/20" : "bg-muted"
+                      }`}>
+                        {tx.transaction_type === "deposit" ? (
+                          <ArrowDownRight className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                        ) : tx.transaction_type === "withdrawal" ? (
+                          <ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4 text-destructive" />
+                        ) : (
+                          <ArrowDownRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                        )}
                       </div>
-                      <div className="text-right shrink-0 ml-2">
-                        <div className="font-mono text-sm sm:text-base">{tx.amount}</div>
-                        <div className="text-xs sm:text-sm text-muted-foreground capitalize">{tx.status}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-semibold capitalize text-sm sm:text-base truncate">{tx.transaction_type} {tx.asset_symbol}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">
+                          {new Date(tx.created_at).toLocaleDateString()}
+                        </div>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* AI Agent Status Widget */}
-          <AgentStatusWidget />
-        </div>
+                    <div className="text-right shrink-0 ml-2">
+                      <div className="font-mono text-sm sm:text-base">{tx.amount}</div>
+                      <div className="text-xs sm:text-sm text-muted-foreground capitalize">{tx.status}</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
   );

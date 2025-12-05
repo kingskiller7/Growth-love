@@ -2,7 +2,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Shield, User, HelpCircle, LogOut, FileText, Bell } from "lucide-react";
+import { Shield, User, HelpCircle, LogOut, FileText, Bell, BadgeCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Settings() {
@@ -11,11 +11,18 @@ export default function Settings() {
 
   const menuItems = [
     {
+      icon: BadgeCheck,
+      title: "KYC Verification",
+      description: "Verify your identity to unlock full features",
+      onClick: () => navigate("/kyc"),
+      variant: "default" as const,
+    },
+    {
       icon: Shield,
       title: "Security Settings",
       description: "Manage 2FA, login history, and security alerts",
       onClick: () => navigate("/security"),
-      variant: "default" as const,
+      variant: "outline" as const,
     },
     {
       icon: User,
