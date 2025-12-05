@@ -29,6 +29,7 @@ import SecuritySettings from "./pages/SecuritySettings";
 import Terms from "./pages/Terms";
 import Help from "./pages/Help";
 import Notifications from "./pages/Notifications";
+import KYCVerification from "./pages/KYCVerification";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminBacktest from "./pages/admin/AdminBacktest";
@@ -69,6 +70,7 @@ const App = () => (
             <Route path="/terms" element={<ProtectedRoute><Terms /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/kyc" element={<ProtectedRoute><KYCVerification /></ProtectedRoute>} />
             {/* Admin Routes with separate layout */}
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/agents" element={<AdminRoute><Agents /></AdminRoute>} />

@@ -7,12 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Activity, Loader2, X, Sparkles } from "lucide-react";
+import { TrendingUp, Loader2, Sparkles, X } from "lucide-react";
 import { useMarketData } from "@/hooks/useMarketData";
 import { useOrders } from "@/hooks/useOrders";
 import { useDexPrices } from "@/hooks/useDexPrices";
 import { useAIAnalysis } from "@/hooks/useAIAnalysis";
 import { AISuggestionsPanel } from "@/components/ai/AISuggestionsPanel";
+import { TradingViewChart } from "@/components/trading/TradingViewChart";
 import { formatDistanceToNow } from "date-fns";
 
 export default function Trade() {
@@ -148,20 +149,7 @@ export default function Trade() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Price Chart</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[400px] flex items-center justify-center bg-muted/50 rounded-lg">
-                  <div className="text-center text-muted-foreground">
-                    <Activity className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>Chart visualization coming soon</p>
-                    <p className="text-sm mt-1">Real-time price charts</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <TradingViewChart symbol={selectedPair} height={400} />
 
             {dexPrices && dexPrices.quotes.length > 0 && (
               <Card>
