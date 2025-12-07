@@ -7,14 +7,16 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Loader2, Sparkles, X } from "lucide-react";
+import { TrendingUp, Loader2, Sparkles, X, ChevronDown, ChevronUp } from "lucide-react";
 import { useMarketData } from "@/hooks/useMarketData";
 import { useOrders } from "@/hooks/useOrders";
 import { useDexPrices } from "@/hooks/useDexPrices";
 import { useAIAnalysis } from "@/hooks/useAIAnalysis";
 import { AISuggestionsPanel } from "@/components/ai/AISuggestionsPanel";
 import { TradingViewChart } from "@/components/trading/TradingViewChart";
+import { AdvancedOrderPanel } from "@/components/trading/AdvancedOrderPanel";
 import { formatDistanceToNow } from "date-fns";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export default function Trade() {
   const [selectedPair, setSelectedPair] = useState("BTC");
@@ -397,6 +399,13 @@ export default function Trade() {
                 <AISuggestionsPanel symbol={`${selectedPair}/USDT`} />
               </CardContent>
             </Card>
+
+            {/* Advanced Orders Panel */}
+            <AdvancedOrderPanel 
+              baseAsset={selectedPair} 
+              quoteAsset="USDT" 
+              currentPrice={currentPrice?.price || 0} 
+            />
 
             <Card>
               <CardHeader>

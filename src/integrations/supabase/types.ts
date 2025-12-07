@@ -500,6 +500,66 @@ export type Database = {
           },
         ]
       }
+      kyc_submissions: {
+        Row: {
+          address: string
+          admin_notes: string | null
+          city: string
+          country: string
+          created_at: string
+          document_back_url: string | null
+          document_front_url: string | null
+          document_number: string
+          document_type: string
+          id: string
+          postal_code: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          admin_notes?: string | null
+          city: string
+          country: string
+          created_at?: string
+          document_back_url?: string | null
+          document_front_url?: string | null
+          document_number: string
+          document_type: string
+          id?: string
+          postal_code: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          admin_notes?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          document_back_url?: string | null
+          document_front_url?: string | null
+          document_number?: string
+          document_type?: string
+          id?: string
+          postal_code?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       login_history: {
         Row: {
           created_at: string
@@ -616,12 +676,17 @@ export type Database = {
           filled_amount: number | null
           filled_at: string | null
           id: string
+          leverage: number | null
+          liquidation_price: number | null
+          margin_enabled: boolean | null
+          oco_linked_order_id: string | null
           order_side: Database["public"]["Enums"]["order_side"]
           order_type: Database["public"]["Enums"]["order_type"]
           price: number | null
           quote_asset: string
           status: Database["public"]["Enums"]["order_status"]
           stop_price: number | null
+          trailing_stop_percent: number | null
           updated_at: string
           user_id: string
         }
@@ -632,12 +697,17 @@ export type Database = {
           filled_amount?: number | null
           filled_at?: string | null
           id?: string
+          leverage?: number | null
+          liquidation_price?: number | null
+          margin_enabled?: boolean | null
+          oco_linked_order_id?: string | null
           order_side: Database["public"]["Enums"]["order_side"]
           order_type: Database["public"]["Enums"]["order_type"]
           price?: number | null
           quote_asset: string
           status?: Database["public"]["Enums"]["order_status"]
           stop_price?: number | null
+          trailing_stop_percent?: number | null
           updated_at?: string
           user_id: string
         }
@@ -648,16 +718,29 @@ export type Database = {
           filled_amount?: number | null
           filled_at?: string | null
           id?: string
+          leverage?: number | null
+          liquidation_price?: number | null
+          margin_enabled?: boolean | null
+          oco_linked_order_id?: string | null
           order_side?: Database["public"]["Enums"]["order_side"]
           order_type?: Database["public"]["Enums"]["order_type"]
           price?: number | null
           quote_asset?: string
           status?: Database["public"]["Enums"]["order_status"]
           stop_price?: number | null
+          trailing_stop_percent?: number | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_oco_linked_order_id_fkey"
+            columns: ["oco_linked_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pool_transactions: {
         Row: {
