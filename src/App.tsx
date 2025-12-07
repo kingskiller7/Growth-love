@@ -39,6 +39,7 @@ import PoolManagement from "./pages/admin/PoolManagement";
 import UserManagement from "./pages/admin/UserManagement";
 import AlgorithmManagement from "./pages/admin/AlgorithmManagement";
 import MakeUserAdmin from "./pages/admin/MakeUserAdmin";
+import KYCReview from "./pages/admin/KYCReview";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => (
             <Route path="/admin/security" element={<AdminRoute><AdminSecurity /></AdminRoute>} />
             <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
             <Route path="/admin/make-admin" element={<AdminRoute><MakeUserAdmin /></AdminRoute>} />
+            <Route path="/admin/kyc" element={<AdminRoute><KYCReview /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

@@ -16,9 +16,30 @@ interface KYCData {
   country: string;
 }
 
+interface KYCSubmission {
+  id: string;
+  user_id: string;
+  document_type: string;
+  document_number: string;
+  document_front_url: string | null;
+  document_back_url: string | null;
+  selfie_url: string | null;
+  address: string;
+  city: string;
+  postal_code: string;
+  country: string;
+  status: string;
+  admin_notes: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export function useKYC() {
   const [kycStatus, setKycStatus] = useState<KYCStatus>('not_submitted');
   const [loading, setLoading] = useState(false);
+  const [submissions, setSubmissions] = useState<KYCSubmission[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,12 +59,47 @@ export function useKYC() {
 
       if (profile?.kyc_verified) {
         setKycStatus('verified');
-      } else if (profile?.kyc_verified_at) {
-        // If kyc_verified_at exists but not verified, it's pending
-        setKycStatus('pending');
+      } else {
+        // Check for pending submissions
+        const { data: submission } = await supabase
+          .from('kyc_submissions')
+          .select('status')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (submission) {
+          if (submission.status === 'pending') {
+            setKycStatus('pending');
+          } else if (submission.status === 'rejected') {
+            setKycStatus('rejected');
+          }
+        }
       }
     } catch (error) {
       console.error('Error fetching KYC status:', error);
+    }
+  };
+
+  const uploadFile = async (file: File, userId: string, fileType: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}/${fileType}-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('kyc-documents')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      return fileName;
+    } catch (error) {
+      console.error(`Error uploading ${fileType}:`, error);
+      return null;
     }
   };
 
@@ -53,19 +109,48 @@ export function useKYC() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // In production, upload files to storage and store references
-      // For now, we'll mark as pending review
-      
-      const { error } = await supabase
+      // Upload documents to storage
+      let documentFrontUrl: string | null = null;
+      let documentBackUrl: string | null = null;
+      let selfieUrl: string | null = null;
+
+      if (data.documentFront) {
+        documentFrontUrl = await uploadFile(data.documentFront, user.id, 'document-front');
+      }
+      if (data.documentBack) {
+        documentBackUrl = await uploadFile(data.documentBack, user.id, 'document-back');
+      }
+      if (data.selfie) {
+        selfieUrl = await uploadFile(data.selfie, user.id, 'selfie');
+      }
+
+      // Create KYC submission record
+      const { error: submissionError } = await supabase
+        .from('kyc_submissions')
+        .insert({
+          user_id: user.id,
+          document_type: data.documentType,
+          document_number: data.documentNumber,
+          document_front_url: documentFrontUrl,
+          document_back_url: documentBackUrl,
+          selfie_url: selfieUrl,
+          address: data.address,
+          city: data.city,
+          postal_code: data.postalCode,
+          country: data.country,
+          status: 'pending',
+        });
+
+      if (submissionError) throw submissionError;
+
+      // Update profile
+      await supabase
         .from('profiles')
         .update({
-          kyc_verified: false,
-          kyc_verified_at: new Date().toISOString(),
           country: data.country,
+          kyc_verified_at: new Date().toISOString(),
         })
         .eq('id', user.id);
-
-      if (error) throw error;
 
       // Create notification for admin
       await supabase.from('notifications').insert({
@@ -100,9 +185,53 @@ export function useKYC() {
     }
   };
 
-  const verifyUser = async (userId: string, approved: boolean) => {
+  const fetchPendingSubmissions = async () => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
+        .from('kyc_submissions')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSubmissions(data || []);
+    } catch (error) {
+      console.error('Error fetching KYC submissions:', error);
+    }
+  };
+
+  const getDocumentUrl = async (path: string): Promise<string | null> => {
+    try {
+      const { data } = await supabase.storage
+        .from('kyc-documents')
+        .createSignedUrl(path, 3600); // 1 hour expiry
+
+      return data?.signedUrl || null;
+    } catch (error) {
+      console.error('Error getting document URL:', error);
+      return null;
+    }
+  };
+
+  const verifyUser = async (userId: string, submissionId: string, approved: boolean, notes?: string) => {
+    try {
+      const { data: { user: admin } } = await supabase.auth.getUser();
+      if (!admin) throw new Error('Not authenticated');
+
+      // Update KYC submission
+      const { error: submissionError } = await supabase
+        .from('kyc_submissions')
+        .update({
+          status: approved ? 'approved' : 'rejected',
+          admin_notes: notes || null,
+          reviewed_by: admin.id,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq('id', submissionId);
+
+      if (submissionError) throw submissionError;
+
+      // Update profile
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
           kyc_verified: approved,
@@ -110,7 +239,7 @@ export function useKYC() {
         })
         .eq('id', userId);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
       // Notify user
       await supabase.from('notifications').insert({
@@ -118,14 +247,25 @@ export function useKYC() {
         title: approved ? 'KYC Approved' : 'KYC Rejected',
         message: approved 
           ? 'Your identity has been verified. You now have full access.'
-          : 'Your KYC verification was rejected. Please resubmit with clearer documents.',
+          : `Your KYC verification was rejected. ${notes || 'Please resubmit with clearer documents.'}`,
         type: 'kyc',
+      });
+
+      // Log security event
+      await supabase.from('security_audit_log').insert({
+        user_id: admin.id,
+        event_type: approved ? 'kyc_approved' : 'kyc_rejected',
+        event_description: `KYC ${approved ? 'approved' : 'rejected'} for user ${userId}`,
+        severity: 'info',
+        metadata: { target_user_id: userId, notes },
       });
 
       toast({
         title: approved ? 'User Verified' : 'User Rejected',
         description: `KYC status updated successfully`,
       });
+
+      await fetchPendingSubmissions();
     } catch (error) {
       console.error('Error verifying user:', error);
       toast({
@@ -139,8 +279,11 @@ export function useKYC() {
   return {
     kycStatus,
     loading,
+    submissions,
     submitKYC,
     verifyUser,
+    fetchPendingSubmissions,
+    getDocumentUrl,
     refetch: fetchKYCStatus,
   };
 }
