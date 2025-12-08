@@ -782,9 +782,12 @@ export type Database = {
       }
       pools: {
         Row: {
+          circulating_supply: number | null
           created_at: string
+          current_supply: number | null
           description: string | null
           id: string
+          max_supply: number | null
           name: string
           pool_number: number
           reserve_ratio: number | null
@@ -793,9 +796,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          circulating_supply?: number | null
           created_at?: string
+          current_supply?: number | null
           description?: string | null
           id?: string
+          max_supply?: number | null
           name: string
           pool_number: number
           reserve_ratio?: number | null
@@ -804,9 +810,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          circulating_supply?: number | null
           created_at?: string
+          current_supply?: number | null
           description?: string | null
           id?: string
+          max_supply?: number | null
           name?: string
           pool_number?: number
           reserve_ratio?: number | null
@@ -1001,6 +1010,44 @@ export type Database = {
         }
         Relationships: []
       }
+      token_supply_control: {
+        Row: {
+          action: string
+          amount: number
+          created_at: string
+          executed_by: string
+          id: string
+          pool_id: string | null
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          amount: number
+          created_at?: string
+          executed_by: string
+          id?: string
+          pool_id?: string | null
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          amount?: number
+          created_at?: string
+          executed_by?: string
+          id?: string
+          pool_id?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_supply_control_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
@@ -1140,6 +1187,39 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_addresses: {
+        Row: {
+          address: string
+          chain: string
+          created_at: string
+          id: string
+          is_primary: boolean | null
+          private_key_encrypted: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          chain?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          private_key_encrypted: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          chain?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          private_key_encrypted?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

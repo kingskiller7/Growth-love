@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import { AdminDashboardCharts } from '@/components/admin/AdminDashboardCharts';
 
 const miniChartData = [
   { value: 400 }, { value: 300 }, { value: 500 }, { value: 280 },
@@ -311,6 +312,9 @@ export default function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Analytics Charts */}
+        <AdminDashboardCharts />
       </div>
     </AdminLayout>
   );
