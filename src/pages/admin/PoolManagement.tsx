@@ -4,12 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { usePoolManagement } from '@/hooks/usePoolManagement';
+import { useTokenSupply } from '@/hooks/useTokenSupply';
 import { 
   Database, ArrowUpRight, ArrowDownRight, RefreshCw, 
-  Droplets, TrendingUp, AlertTriangle, Zap
+  Droplets, TrendingUp, AlertTriangle, Zap, Plus, Minus, Settings
 } from 'lucide-react';
 
 interface Pool {
@@ -37,6 +41,11 @@ export default function PoolManagement() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { rebalancePools, loading: poolLoading } = usePoolManagement();
+  const { pools: supplyPools, mintTokens, burnTokens, updateMaxSupply, loading: supplyLoading } = useTokenSupply();
+  const [mintAmount, setMintAmount] = useState('');
+  const [burnAmount, setBurnAmount] = useState('');
+  const [mintReason, setMintReason] = useState('');
+  const [burnReason, setBurnReason] = useState('');
 
   useEffect(() => {
     fetchPoolData();
@@ -211,14 +220,58 @@ export default function PoolManagement() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1" size="sm">
-                      <ArrowUpRight className="h-3 w-3 mr-1" />
-                      Add Liquidity
-                    </Button>
-                    <Button variant="outline" className="flex-1" size="sm">
-                      <ArrowDownRight className="h-3 w-3 mr-1" />
-                      Withdraw
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="flex-1" size="sm">
+                          <Plus className="h-3 w-3 mr-1" />Mint
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Mint DEW Tokens</DialogTitle>
+                          <DialogDescription>Add new tokens to the supply</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label>Amount</Label>
+                            <Input type="number" value={mintAmount} onChange={(e) => setMintAmount(e.target.value)} placeholder="Enter amount" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Reason</Label>
+                            <Input value={mintReason} onChange={(e) => setMintReason(e.target.value)} placeholder="Reason for minting" />
+                          </div>
+                          <Button className="w-full" disabled={supplyLoading} onClick={async () => { await mintTokens(pool.id, Number(mintAmount), mintReason); setMintAmount(''); setMintReason(''); }}>
+                            Mint Tokens
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="flex-1" size="sm">
+                          <Minus className="h-3 w-3 mr-1" />Burn
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Burn DEW Tokens</DialogTitle>
+                          <DialogDescription>Remove tokens from circulation</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label>Amount</Label>
+                            <Input type="number" value={burnAmount} onChange={(e) => setBurnAmount(e.target.value)} placeholder="Enter amount" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Reason</Label>
+                            <Input value={burnReason} onChange={(e) => setBurnReason(e.target.value)} placeholder="Reason for burning" />
+                          </div>
+                          <Button variant="destructive" className="w-full" disabled={supplyLoading} onClick={async () => { await burnTokens(pool.id, Number(burnAmount), burnReason); setBurnAmount(''); setBurnReason(''); }}>
+                            Burn Tokens
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </CardContent>
               </Card>
